@@ -1,5 +1,9 @@
 # git-phoenix
-A dynamic Git Branching Tool
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/21197980/46575862-31a46400-c994-11e8-9006-1ade4bc720cb.png" alt="teste">
+</p>
+
+## A dynamic Git Branching Tool
 
 Git Phoenix is a Dynamic Branching Tool. We noticed that not all projects can be managed, using the branching models that are largely used by several companies. Many of them, have to adapt the way that they work with Git, just to fit with the branching model chosen.
 
