@@ -13,3 +13,12 @@ We made a system that adapts itself with the rules defined by the user or compan
 
 You can define the branching rules for your Git Repository on a template.
 Currently, we are working on a template using a JSON file, but in the near future, we will make Git Phoenix able to read XML and Protobuf files, besides JSON.
+
+### Installation
+
+TODO
+
+### Coming soon...
+
+  * XML Templates
+  * Protobuf Templates
