@@ -17,8 +17,3 @@ Currently, we are working on a template using a JSON file, but in the near futur
 ### Installation
 
 TODO
-
-### Coming soon...
-
-  * XML Templates
-  * Protobuf Templates
