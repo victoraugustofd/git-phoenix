@@ -1,4 +1,7 @@
 # git-phoenix
+
+[![Join the chat at https://gitter.im/git-phoenix/community](https://badges.gitter.im/git-phoenix/community.svg)](https://gitter.im/git-phoenix/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 <p align="center">
   <img src="https://user-images.githubusercontent.com/21197980/46575862-31a46400-c994-11e8-9006-1ade4bc720cb.png" alt="teste">
 </p>
