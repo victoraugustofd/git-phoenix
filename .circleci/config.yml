@@ -15,4 +15,4 @@ jobs:
               codecov
 
               sudo pip install coverage
-              coverage run tests.py
+              coverage run src/tests.py
