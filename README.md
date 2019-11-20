@@ -1,6 +1,10 @@
 # git-phoenix
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![python: ^3.8](https://img.shields.io/badge/python-%5E3.8-blue)](https://www.python.org/downloads/release/python-380) [![Join the chat at https://gitter.im/git-phoenix/community](https://badges.gitter.im/git-phoenix/community.svg)](https://gitter.im/git-phoenix/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://forthebadge.com)
+
+[![Open Source Love](https://badges.frapsoft.com/os/v2/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![python: 3.6+](https://img.shields.io/badge/python-3.6+-blue)](https://www.python.org/download/releases/3.6.0/) [![Join the chat at https://gitter.im/git-phoenix/community](https://badges.gitter.im/git-phoenix/community.svg)](https://gitter.im/git-phoenix/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [![CircleCI](https://circleci.com/gh/victoraugustofd/git-phoenix.svg?style=svg)](https://circleci.com/gh/victoraugustofd/git-phoenix)
 
