@@ -10,5 +10,5 @@ jobs:
             command: |  # use pipenv to install dependencies
               sudo pip install pipenv
               pipenv install
-              pip install codecov
+              sudo pip install codecov
               codecov
