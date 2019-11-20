@@ -1,6 +1,7 @@
 [run]
 branch = True
 source = src
+include=src/*
 
 [report]
 exclude_lines =
