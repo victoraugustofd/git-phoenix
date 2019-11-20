@@ -4,7 +4,7 @@ jobs:
     working_directory: ~/project
     docker:
       - image: circleci/python:3.8.0
-    stps:
+    steps:
         - checkout  # checkout source code to working directory
         - run:
             command: |  # use pipenv to install dependencies
