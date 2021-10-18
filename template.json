@@ -149,7 +149,7 @@
                     ]
                   },
                   "pattern": {
-                    "regex": "",
+                    "regex": "[A-Z0-9]+-\\d+",
                     "message": "Nome inválido",
                     "example": "CCTUGLRPF-123"
                   }
@@ -164,28 +164,85 @@
             {
               "step": 1,
               "do": {
-                "action": "merge",
+                "action": "mergeRequest",
                 "parameters": {
-                  "target": [
-                    {
-                      "name": "master"
-                    }
-                  ]
+                  "target": {
+                    "name": "$originBranch"
+                  },
+                  "mrTemplate": ""
                 }
               }
             },
             {
               "step": 2,
               "do": {
-                "action": "tag",
+                "action": "deleteBranch",
                 "parameters": {
-                  "reference": "branch",
-                  "increment": "patch",
-                  "target": [
-                    {
-                      "name": "master"
-                    }
-                  ]
+                  "source": {
+                    "name": "$self"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "bug",
+      "alias": "bg",
+      "actions": [
+        {
+          "name": "start",
+          "execution": [
+            {
+              "step": 1,
+              "do": {
+                "action": "createBranch",
+                "parameters": {
+                  "name": "",
+                  "source": {
+                    "name": "hotfix"
+                  },
+                  "affix": {
+                    "prefix": [
+                      "bug",
+                      "$version"
+                    ]
+                  },
+                  "pattern": {
+                    "regex": "[A-Z0-9]+-\\d+",
+                    "message": "Nome inválido",
+                    "example": "CCTUGLRPF-123"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "finish",
+          "execution": [
+            {
+              "step": 1,
+              "do": {
+                "action": "mergeRequest",
+                "parameters": {
+                  "target": {
+                    "name": "$originBranch"
+                  },
+                  "mrTemplate": ""
+                }
+              }
+            },
+            {
+              "step": 2,
+              "do": {
+                "action": "deleteBranch",
+                "parameters": {
+                  "source": {
+                    "name": "$self"
+                  }
                 }
               }
             }

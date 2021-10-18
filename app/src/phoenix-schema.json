@@ -86,6 +86,190 @@
         "tag"
       ]
     },
+    "do": {
+      "$id": "#do",
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#actions"
+        },
+        "parameters": {
+          "type": "object"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "createBranch"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "parameters": {
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "$ref": "#branch"
+                  },
+                  "affix": {
+                    "$ref": "#affix"
+                  },
+                  "pattern": {
+                    "$ref": "#pattern"
+                  }
+                },
+                "required": [
+                  "name",
+                  "source"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "deleteBranch"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "parameters": {
+                "properties": {
+                  "source": {
+                    "$ref": "#branch"
+                  },
+                  "pattern": {
+                    "$ref": "#pattern"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "merge"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "parameters": {
+                "properties": {
+                  "source": {
+                    "$ref": "#branch"
+                  },
+                  "target": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#branch"
+                    },
+                    "minItems": 1
+                  },
+                  "allowNewMerge": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "target"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "mergeRequest"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "parameters": {
+                "properties": {
+                  "source": {
+                    "$ref": "#branch"
+                  },
+                  "target": {
+                    "$ref": "#branch"
+                  },
+                  "mrTemplate": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "target"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "action": {
+                "const": "tag"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "parameters": {
+                "properties": {
+                  "reference": {
+                    "enum": [
+                      "branch",
+                      "tag"
+                    ]
+                  },
+                  "increment": {
+                    "enum": [
+                      "major",
+                      "minor",
+                      "patch"
+                    ]
+                  },
+                  "target": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#branch"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "reference",
+                  "increment",
+                  "target"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      ],
+      "required": [
+        "action",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
     "execution": {
       "$id": "#execution",
       "type": "object",
@@ -94,186 +278,7 @@
           "type": "integer"
         },
         "do": {
-          "type": "object",
-          "properties": {
-            "action": {
-              "$ref": "#actions"
-            },
-            "parameters": {
-              "type": "object"
-            }
-          },
-          "allOf": [
-            {
-              "if": {
-                "properties": {
-                  "action": {
-                    "const": "createBranch"
-                  }
-                }
-              },
-              "then": {
-                "properties": {
-                  "parameters": {
-                    "properties": {
-                      "name": {
-                        "type": "string"
-                      },
-                      "source": {
-                        "$ref": "#branch"
-                      },
-                      "affix": {
-                        "$ref": "#affix"
-                      },
-                      "pattern": {
-                        "$ref": "#pattern"
-                      }
-                    },
-                    "required": [
-                      "name",
-                      "source"
-                    ],
-                    "additionalProperties": false
-                  }
-                }
-              }
-            },{
-              "if": {
-                "properties": {
-                  "action": {
-                    "const": "deleteBranch"
-                  }
-                }
-              },
-              "then": {
-                "properties": {
-                  "parameters": {
-                    "properties": {
-                      "source": {
-                        "$ref": "#branch"
-                      },
-                      "pattern": {
-                        "$ref": "#pattern"
-                      }
-                    },
-                    "additionalProperties": false
-                  }
-                }
-              }
-            },
-            {
-              "if": {
-                "properties": {
-                  "action": {
-                    "const": "merge"
-                  }
-                }
-              },
-              "then": {
-                "properties": {
-                  "parameters": {
-                    "properties": {
-                      "source": {
-                        "$ref": "#branch"
-                      },
-                      "target": {
-                        "type": "array",
-                        "items": {
-                          "$ref": "#branch"
-                        },
-                        "minItems": 1
-                      },
-                      "allowNewMerge": {
-                        "type": "boolean"
-                      }
-                    },
-                    "required": [
-                      "target"
-                    ],
-                    "additionalProperties": false
-                  }
-                }
-              }
-            },
-            {
-              "if": {
-                "properties": {
-                  "action": {
-                    "const": "mergeRequest"
-                  }
-                }
-              },
-              "then": {
-                "properties": {
-                  "parameters": {
-                    "properties": {
-                      "source": {
-                        "$ref": "#branch"
-                      },
-                      "target": {
-                        "$ref": "#branch"
-                      },
-                      "mrTemplate": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "target"
-                    ],
-                    "additionalProperties": false
-                  }
-                }
-              }
-            },
-            {
-              "if": {
-                "properties": {
-                  "action": {
-                    "const": "tag"
-                  }
-                }
-              },
-              "then": {
-                "properties": {
-                  "parameters": {
-                    "properties": {
-                      "reference": {
-                        "enum": [
-                          "branch",
-                          "tag"
-                        ]
-                      },
-                      "increment": {
-                        "enum": [
-                          "major",
-                          "minor",
-                          "patch"
-                        ]
-                      },
-                      "target": {
-                        "type": "array",
-                        "items": {
-                          "$ref": "#branch"
-                        },
-                        "minItems": 1
-                      }
-                    },
-                    "required": [
-                      "reference",
-                      "increment",
-                      "target"
-                    ],
-                    "additionalProperties": false
-                  }
-                }
-              }
-            }
-          ],
-          "required": [
-            "action",
-            "parameters"
-          ],
-          "additionalProperties": false
+          "$ref": "#do"
         }
       },
       "required": [
@@ -306,6 +311,19 @@
       ],
       "additionalProperties": false
     },
+    "init": {
+      "$id": "#init",
+      "type": "object",
+      "properties": {
+        "execution": {
+          "type": "array",
+          "items": {
+            "$ref": "#execution"
+          },
+          "minItems": 1
+        }
+      }
+    },
     "command": {
       "$id": "#command",
       "type": "object",
@@ -334,16 +352,7 @@
   "type": "object",
   "properties": {
     "init": {
-      "type": "object",
-      "properties": {
-        "execution": {
-          "type": "array",
-          "items": {
-            "$ref": "#execution"
-          },
-          "minItems": 1
-        }
-      }
+      "$ref": "#init"
     },
     "commons": {
       "type": "object"
