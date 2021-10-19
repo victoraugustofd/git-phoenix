@@ -20,7 +20,7 @@
             "type": "string"
           }
         },
-        "joinChar": {
+        "join_char": {
           "type": "string",
           "default": "/"
         }
@@ -178,7 +178,7 @@
                     },
                     "minItems": 1
                   },
-                  "allowNewMerge": {
+                  "allow_new_merge": {
                     "type": "boolean"
                   }
                 },
@@ -208,7 +208,7 @@
                   "target": {
                     "$ref": "#branch"
                   },
-                  "mrTemplate": {
+                  "mr_template": {
                     "type": "string"
                   }
                 },
@@ -297,6 +297,9 @@
         "alias": {
           "type": "string"
         },
+        "help": {
+          "type": "string"
+        },
         "execution": {
           "type": "array",
           "items": {
@@ -334,6 +337,9 @@
         "alias": {
           "type": "string"
         },
+        "help": {
+          "type": "string"
+        },
         "actions": {
           "type": "array",
           "items": {
@@ -354,7 +360,7 @@
     "init": {
       "$ref": "#init"
     },
-    "commons": {
+    "variables": {
       "type": "object"
     },
     "commands": {
