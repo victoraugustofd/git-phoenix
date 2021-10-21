@@ -254,9 +254,19 @@
                   }
                 },
                 "required": [
-                  "reference",
-                  "increment",
                   "target"
+                ],
+                "anyOf": [
+                  {
+                    "required": [
+                      "reference"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "increment"
+                    ]
+                  }
                 ],
                 "additionalProperties": false
               }
