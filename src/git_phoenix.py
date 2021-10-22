@@ -6,11 +6,13 @@ from json import JSONDecodeError
 
 import pkg_resources
 from jsonschema import validate, ValidationError
-
 from src import InvalidTemplateException
 from src import PhoenixException
+from src import Execution
 from src import get_template
 from src import require_git_repo
+from src import fire_rules
+
 from . import resources
 
 PARSER = argparse.ArgumentParser(description="Description of your program")
@@ -42,6 +44,25 @@ def _execute_args_rules():
         _get_version()
 
 
+def _get_template():
+    template_path = get_template()
+
+    with open(template_path) as template_file:
+        try:
+            return json.load(template_file)
+        except JSONDecodeError as e:
+            raise InvalidTemplateException(
+                f"{e.msg} - Error at line:"
+                f" {e.lineno} "
+                f"and "
+                f"column: {e.colno}"
+            )
+
+
+def _validate_if_init(args, template):
+    return "init" == args[0] and {} != template["init"]
+
+
 def main():
     try:
         args = sys.argv[1:]
@@ -51,22 +72,22 @@ def main():
                 _execute_args_rules()
             else:
                 require_git_repo()
-                template_path = get_template()
-
-                with open(template_path) as template_file:
-                    try:
-                        template = json.load(template_file)
-                    except JSONDecodeError as e:
-                        raise InvalidTemplateException(
-                            e.msg + "Error at "
-                            "line: " + str(e.lineno) + " and "
-                            "column " + str(e.colno)
-                        )
+                template = _get_template()
 
                 try:
                     validate(instance=template, schema=PHOENIX_SCHEMA)
+
+                    if not _validate_if_init(args, template):
+                        print("Your template doesn't have an init component!")
+
+                    # Create execution object to carry template and arguments through execution
+                    execution = Execution(args, template)
+
+                    print("Firing rules...")
+
+                    fire_rules(execution=execution)
                 except ValidationError as e:
-                    print(e.message)
+                    raise InvalidTemplateException(e.message)
         else:
             # Logger.error(
             #     cls=Phoenix, msg="Please inform arguments to Phoenix!"
@@ -75,4 +96,4 @@ def main():
     except PhoenixException as e:
         print(e.message)
     except Exception as e:
-        print("non treated exception")
+        print(str(e))

@@ -10,7 +10,7 @@ def get_config(key):
     try:
         return GIT_REPO.git.config(key)
     except GitCommandError:
-        return "Config not found"
+        return f"Config {key} not found"
 
 
 def require_git_repo():
@@ -25,3 +25,33 @@ def _is_git_repo():
         return True
     except git.exc.InvalidGitRepositoryError:
         return False
+
+
+def has_unstaged_files():
+    unstaged_files = GIT_REPO.git.status("--porcelain")
+
+    if not unstaged_files:
+        return False
+
+    return True
+
+
+def is_ahead():
+    try:
+        branch = retrieve_current_branch()
+
+        commits_ahead = GIT_REPO.iter_commits(
+            "origin/" + branch + ".." + branch
+        )
+        number_of_commits = sum(1 for c in commits_ahead)
+
+        return number_of_commits > 0
+    except GitCommandError:
+        print(
+            f"Your current branch ({branch}) doesn't exists on remote "
+            f"repo. Please use git push origin {branch}."
+        )
+
+
+def retrieve_current_branch():
+    return GIT_REPO.active_branch.name

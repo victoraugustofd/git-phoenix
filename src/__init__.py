@@ -4,3 +4,6 @@ from src.core.git import require_git_repo
 from src.core.git import require_git_repo
 
 from src.core.phoenix import get_template
+
+from src.core.models import Execution
+from src.core.rules import fire_rules
