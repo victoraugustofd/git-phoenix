@@ -16,6 +16,16 @@ class InvalidTemplateException(PhoenixException):
 
 
 @dataclass
+class InvalidPatternException(PhoenixException):
+    message: str = "Invalid pattern!"
+
+
+@dataclass
+class InvalidExecutionException(PhoenixException):
+    message: str = "Invalid execution!"
+
+
+@dataclass
 class CommandNotFoundException(PhoenixException):
     command: str = None
 
@@ -33,11 +43,29 @@ class ActionNotFoundException(PhoenixException):
 
 @dataclass
 class UnstagedFilesException(PhoenixException):
-    message: str = "You have unstaged files! Please commit them before proceeding."
-
+    message: str = (
+        "You have unstaged files! Please commit them before proceeding."
+    )
 
 
 @dataclass
 class BranchAheadException(PhoenixException):
-    message: str = "You are ahead of remote branch! Please push your changes before proceeding."
+    message: str = (
+        "You are ahead of remote branch! Please push your "
+        "changes before proceeding."
+    )
 
+
+@dataclass
+class ShowHelpException(PhoenixException):
+    message: str = None
+
+
+@dataclass
+class InvalidVariableException(PhoenixException):
+    message: str = None
+
+
+@dataclass
+class MethodNotImplementedException(PhoenixException):
+    message: str = None

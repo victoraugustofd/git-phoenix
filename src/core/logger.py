@@ -2,53 +2,55 @@ import abc
 import logging
 import sys
 
-from src.core import BLACK
-from src.core import RED
-from src.core import GREEN
-from src.core import BROWN_ORANGE
-from src.core import BLUE
-from src.core import PURPLE
-from src.core import CYAN
-from src.core import LIGHT_GRAY
-from src.core import DARK_GRAY
-from src.core import LIGHT_RED
-from src.core import LIGHT_GREEN
-from src.core import YELLOW
-from src.core import LIGHT_BLUE
-from src.core import LIGHT_PURPLE
-from src.core import LIGHT_CYAN
-from src.core import WHITE
-from src.core import NC
+from colorlog import ColoredFormatter
+
+from src.core.phoenix import BLACK
+from src.core.phoenix import RED
+from src.core.phoenix import GREEN
+from src.core.phoenix import BROWN_ORANGE
+from src.core.phoenix import BLUE
+from src.core.phoenix import PURPLE
+from src.core.phoenix import CYAN
+from src.core.phoenix import LIGHT_GRAY
+from src.core.phoenix import DARK_GRAY
+from src.core.phoenix import LIGHT_RED
+from src.core.phoenix import LIGHT_GREEN
+from src.core.phoenix import YELLOW
+from src.core.phoenix import LIGHT_BLUE
+from src.core.phoenix import LIGHT_PURPLE
+from src.core.phoenix import LIGHT_CYAN
+from src.core.phoenix import WHITE
+from src.core.phoenix import NC
 
 
 INPUT = 5
 logging.addLevelName(INPUT, 'INPUT')
 
 # Configuring logger properties
-# formatter = ColoredFormatter(
-#     ("[%(log_color)s%(levelname)-8s%(reset)s] "
-#      "%(asctime)s - " +
-#      LIGHT_BLUE +
-#      "%(name)s" +
-#      NC +
-#      " - "
-#      "%(message)s"),
-#     datefmt=None,
-#     reset=True,
-#     log_colors={
-#         'INFO':     'cyan',
-#         "INPUT":    'blue',
-#         'DEBUG':    'green',
-#         'WARNING':  'yellow',
-#         'ERROR':    'red',
-#         'CRITICAL': 'bold_white,bg_red',
-#     },
-#     secondary_log_colors={},
-#     style='%'
-# )
+formatter = ColoredFormatter(
+    ("[%(log_color)s%(levelname)-8s%(reset)s] "
+     "%(asctime)s - " +
+     LIGHT_BLUE +
+     "%(name)s" +
+     NC +
+     " - "
+     "%(message)s"),
+    datefmt=None,
+    reset=True,
+    log_colors={
+        'INFO':     'cyan',
+        "INPUT":    'blue',
+        'DEBUG':    'green',
+        'WARNING':  'yellow',
+        'ERROR':    'red',
+        'CRITICAL': 'bold_white,bg_red',
+    },
+    secondary_log_colors={},
+    style='%'
+)
 
 ch = logging.StreamHandler()
-# ch.setFormatter(formatter)
+ch.setFormatter(formatter)
 
 
 class Logger(abc.ABC):

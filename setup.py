@@ -17,6 +17,8 @@ setup(
         "argparse",
         "jsonschema",
         "colorlog",
+        "questionary",
+        "click"
     ],
     python_requires="3.7",
     license="MIT",

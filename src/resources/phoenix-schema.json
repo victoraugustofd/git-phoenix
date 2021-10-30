@@ -371,7 +371,14 @@
       "$ref": "#init"
     },
     "variables": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "self": false,
+        "version": false
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
     },
     "commands": {
       "type": "array",

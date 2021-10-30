@@ -1,7 +1,8 @@
-from src.core import get_config
-from src.core import CommandNotFoundException
-from src.core import ActionNotFoundException
-
+from src.core.exceptions import (
+    CommandNotFoundException,
+    ActionNotFoundException,
+)
+from src.core.git import get_config
 
 BLACK = "\033[0;30m"
 RED = "\033[0;31m"
@@ -27,7 +28,7 @@ def get_template():
 
 
 def get_command(commands, command_name):
-    print("Validating command...")
+    print(f"Validating command {command_name}...")
 
     command = next(
         filter(lambda x: x.get("name") == command_name, commands), None
@@ -40,7 +41,7 @@ def get_command(commands, command_name):
 
 
 def get_action(actions, action_name):
-    print("Validating action...")
+    print(f"Validating action {action_name}...")
 
     action = next(
         filter(lambda x: x.get("name") == action_name, actions), None
@@ -53,7 +54,6 @@ def get_action(actions, action_name):
 
 
 def read_input(cls, msg):
-    from .logger import Logger
 
     user_input = None
 
@@ -84,3 +84,20 @@ def define_pattern(pattern, should_start, should_end):
         pattern = pattern + "$"
 
     return pattern
+
+
+def determine_pattern(pattern):
+    if isinstance(pattern, list):
+        for i in range(len(pattern)):
+            pattern[i] = (
+                pattern[i].replace("^", "").replace("$", "").replace("/", "\/")
+            )
+
+    pattern = "".join(pattern)
+    pattern = "^" + pattern + "$"
+
+    return pattern
+
+
+def capitalize_first_letter(word):
+    return word[:1].upper() + word[1:]

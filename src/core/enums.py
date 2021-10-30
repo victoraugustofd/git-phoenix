@@ -1,7 +1,20 @@
-from enum import Enum
+from enum import Enum, EnumMeta
 
 
-class Action(Enum):
+class MetaEnum(EnumMeta):
+    def __contains__(self, item):
+        try:
+            self(item)
+        except ValueError:
+            return False
+        return True
+
+
+class BaseEnum(Enum, metaclass=MetaEnum):
+    pass
+
+
+class Action(BaseEnum):
     CREATE_BRANCH = "createBranch"
     DELETE_BRANCH = "deleteBranch"
     MERGE = "merge"
@@ -9,12 +22,12 @@ class Action(Enum):
     TAG = "tag"
 
 
-class TagReference(Enum):
+class TagReference(BaseEnum):
     BRANCH = "branch"
     TAG = "tag"
 
 
-class TagIncrement(Enum):
+class TagIncrement(BaseEnum):
     MAJOR = "major"
     MINOR = "minor"
     PATCH = "patch"
