@@ -44,7 +44,9 @@ def main(args):
         try:
             validate(instance=template, schema=PHOENIX_SCHEMA)
 
+            LOGGER.info("Validando comando...")
             command = _get_command(args=args, template=template)
+            LOGGER.info("Validando ação...")
             action = _get_action(args=args, command=command)
             variables = template.get("variables")
             arguments = args[2:]

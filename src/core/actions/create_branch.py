@@ -51,7 +51,8 @@ class CreateBranch(Executable):
                 final_name.extend(affix.suffix)
                 name = affix.join_char.join(final_name)
 
-        confirmed = confirm(msg=f"Você confirma a criação da "
+        confirmed = confirm(
+            msg=f"Você confirma a criação da "
             f"branch {name} com base na "
             f"branch {source.name}?"
         )

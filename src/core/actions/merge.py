@@ -1,18 +1,16 @@
-import re
-import ast
-from typing import Type, List
+from dataclasses import dataclass
+from typing import List
 
 import questionary
-from src.core.models import ActionExecution
-from src.core.template_models import Branch
-from src.core.phoenix import define_pattern, read_input, determine_pattern
+
+from src.core import merge
 from src.core.actions.executable import (
     Executable,
     _validate_pattern,
     _validate_branch_patterns,
 )
-from src.core import merge
-from dataclasses import dataclass
+from src.core.models import ActionExecution
+from src.core.template_models import Branch
 
 
 @dataclass

@@ -1,10 +1,11 @@
+from src.core.models import ActionExecution
 from src.core.actions.executable import Executable
 
 
 class CustomActions(Executable):
 
-    def __init__(self, execution):
-        super().__init__(execution)
+    def __init__(self, action_execution: ActionExecution):
+        super().__init__(action_execution)
 
     def execute(self):
         pass

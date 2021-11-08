@@ -79,3 +79,8 @@ class BranchAlreadyExistsException(PhoenixException):
 @dataclass
 class ProcessCancelledException(PhoenixException):
     message: str = None
+
+
+@dataclass
+class GitException(PhoenixException):
+    message: str = None

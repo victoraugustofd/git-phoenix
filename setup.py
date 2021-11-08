@@ -12,7 +12,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name="git-phoenix",
-    version="1.0.4",
+    version="1.0.5",
     description="A dynamic git branching tool",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -22,12 +22,12 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        "GitPython",
-        "regex",
-        "argparse",
+        "GitPython==3.1.24",
+        "regex==2021.4.4",
+        "argparse==1.4.0",
         "jsonschema==4.0.1",
-        "coloredlogs",
-        "questionary",
+        "coloredlogs==15.0.1",
+        "questionary==1.10.0",
         "click==8.0.1",
     ],
     python_requires=">=3.7",

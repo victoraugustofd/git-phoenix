@@ -1,9 +1,11 @@
 import git
 from git import GitCommandError, Repo
 
+from src import LOGGER
 from src.core.exceptions import (
     NotAGitRepoException,
     BranchAlreadyExistsException,
+    GitException,
 )
 
 GIT_REPO: Repo
@@ -48,17 +50,15 @@ def has_unstaged_files():
 
 
 def is_ahead():
-    try:
-        branch = retrieve_current_branch()
+    branch = retrieve_current_branch()
 
-        commits_ahead = GIT_REPO.iter_commits(
-            "source/" + branch + ".." + branch
-        )
+    try:
+        commits_ahead = GIT_REPO.iter_commits(branch + ".." + branch)
         number_of_commits = sum(1 for c in commits_ahead)
 
         return number_of_commits > 0
-    except GitCommandError:
-        print(
+    except GitCommandError as e:
+        LOGGER.info(
             f"Your current branch ({branch}) doesn't exists on remote "
             f"repo. Please use git push source {branch}."
         )
@@ -69,16 +69,7 @@ def retrieve_current_branch():
 
 
 def checkout(branch):
-    # Logger.info(
-    #     self=GitCommons,
-    #     msg=(
-    #         "Checking out branch"
-    #         + PythonCommons.LIGHT_CYAN
-    #         + " {}"
-    #         + PythonCommons.NC
-    #         + "..."
-    #     ).format(branch),
-    # )
+    LOGGER.info(f"Fazendo checkout da branch {branch}...")
 
     GIT_REPO.git.checkout(branch)
 
@@ -92,121 +83,60 @@ def _validate_existence(branch):
         raise BranchAlreadyExistsException()
 
 
-def checkout_new_branch(source, branch):
+def checkout_new_branch(source: str, branch: str):
     checkout(source)
     pull(source)
-    # Logger.info(
-    #     self=GitCommons,
-    #     msg=(
-    #         "Creating branch"
-    #         + PythonCommons.LIGHT_CYAN
-    #         + " {} "
-    #         + PythonCommons.NC
-    #         + "based on"
-    #         + PythonCommons.LIGHT_CYAN
-    #         + " {}"
-    #         + PythonCommons.NC
-    #         + "..."
-    #     ).format(branch, source),
-    # )
+
+    LOGGER.info(f"Criando branch {branch} com base na branch {source}...")
+
     try:
         _validate_existence(branch)
 
         GIT_REPO.git.checkout(source, b=branch)
-    except GitCommandError:
-        pass
-        # Logger.error(
-        #     self=GitCommons,
-        #     msg=(
-        #         "Branch"
-        #         + PythonCommons.LIGHT_CYAN
-        #         + " {} "
-        #         + PythonCommons.NC
-        #         + "already exists!"
-        #     ).format(branch),
-        # )
+    except GitCommandError as e:
+        raise GitException(e.stdout)
 
 
-def merge(branch, target, allow_merge_again):
-    git = Repo(".", search_parent_directories=True).git
-
+def merge(branch: str, target: str, allow_merge_again: bool):
     if allow_merge_again or not _already_merged(target, branch):
         checkout(target)
         pull(target)
-        Logger.info(
-            cls=GitCommons,
-            msg=(
-                "Merging branch"
-                + PythonCommons.LIGHT_CYAN
-                + " {} "
-                + PythonCommons.NC
-                + "into"
-                + PythonCommons.LIGHT_CYAN
-                + " {}"
-                + PythonCommons.NC
-                + "..."
-            ).format(branch, target),
-        )
 
+        LOGGER.info(
+            f"Realizando merge da branch {branch} com a branch " f"{target}..."
+        )
         try:
-            git.merge(branch, "--no-ff")
-        except:
-            Logger.warn(
-                cls=GitCommons,
-                msg="You have conflicts on your working tree! Resolve them before commiting!",
+            GIT_REPO.git.merge(branch, "--no-ff")
+        except GitCommandError:
+            raise GitException(
+                "O merge gerou conflitos, você precisa "
+                "resolvê-los antes de commitar!"
             )
-            raise ExecutionException()
     else:
-        Logger.warn(
-            cls=GitCommons,
-            msg=(
-                "Branch"
-                + PythonCommons.LIGHT_CYAN
-                + " {} "
-                + PythonCommons.NC
-                + "already merged into"
-                + PythonCommons.LIGHT_CYAN
-                + " {}"
-                + PythonCommons.NC
-                + "!"
-            ).format(branch, target),
+        LOGGER.warn(
+            f"O merge da branch {branch} com a branch {target} já "
+            f"foi realizado!"
         )
 
 
 def pull(branch):
-    # Logger.info(
-    #     self=GitCommons,
-    #     msg=(
-    #         "Updating branch "
-    #         + PythonCommons.LIGHT_CYAN
-    #         + "{}"
-    #         + PythonCommons.NC
-    #         + "..."
-    #     ).format(branch),
-    # )
+    LOGGER.info(f"Atualizando branch {branch}...")
+
     try:
         GIT_REPO.git.pull()
-    except GitCommandError:
-        pass
+    except GitCommandError as e:
+        raise GitException(e.stdout)
 
 
 def delete(pattern):
-    git = Repo(".", search_parent_directories=True).git
-    Logger.info(
-        cls=GitCommons,
-        msg=(
-            "Deleting branch(es) "
-            + PythonCommons.LIGHT_CYAN
-            + "{}"
-            + PythonCommons.NC
-            + "..."
-        ).format(pattern),
-    )
+    LOGGER.info(f"Excluindo branch(es) {pattern}...")
 
     branches = [
         branch.replace(" ", "") for branch in git.branch().splitlines()
     ]
+
     branches = list(filter(lambda x: x.startswith(pattern), branches))
+
     [git.execute(["git", "branch", "-D", branch]) for branch in branches]
 
 

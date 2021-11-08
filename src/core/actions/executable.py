@@ -4,6 +4,7 @@ from typing import List, Dict
 import questionary
 from regex import regex
 
+from src import LOGGER
 from src.core.phoenix_questionary import select
 from src.core import template_methods
 from src.core.exceptions import (
@@ -77,17 +78,9 @@ class Executable:
     def execute(self):
         pass
 
-    def confirm_execution(self, cls, msg):
-        answer = read_input(cls=cls, msg=msg + " [[y]es/[n]o]")
-
-        yes = {"yes", "y"}
-
-        if answer.lower() in yes:
-            return True
-
-        return False
-
     def _parse_action_parameters(self):
+        LOGGER.info("Realizando parse da ação no template...")
+
         self.action_execution.parameters = {
             k: self._change_value(v)
             for k, v in self.action_execution.parameters.items()
@@ -112,6 +105,8 @@ class Executable:
         return value
 
     def _process_str(self, value: str, execute: bool = True) -> str:
+        LOGGER.debug(f"Processando parse de string {value}...")
+
         if _ismultiplechoice(value):
             return self._process_multiple_choice(value)
         elif _ismethod(value):
@@ -122,12 +117,18 @@ class Executable:
         return value
 
     def _process_list(self, value: List, execute: bool = True) -> List:
+        LOGGER.debug(f"Processando parse de lista {value}...")
+
         return [self._change_value(item, execute) for item in value]
 
     def _process_dict(self, value: Dict, execute: bool = True) -> Dict:
+        LOGGER.debug(f"Processando parse de dicionário {value}...")
+
         return {k: self._change_value(v, execute) for k, v in value.items()}
 
     def _process_multiple_choice(self, value: str) -> str:
+        LOGGER.debug(f"Processando parse de escolhas {value}...")
+
         begin = 0
         end = len(value)
 
@@ -165,6 +166,8 @@ class Executable:
         return self._change_value(user_choice)
 
     def _process_method(self, value: str, execute: bool = True) -> str:
+        LOGGER.debug(f"Processando parse método {value}...")
+
         method_definition = value.split("@")[1]
         method_name = method_definition[0 : method_definition.find("(")]
 
@@ -202,6 +205,8 @@ class Executable:
             raise InvalidTemplateException()
 
     def _process_variable(self, value: str) -> str:
+        LOGGER.debug(f"Processando parse de variável {value}...")
+
         variables = value.split("$")[1:]
 
         if "self" == variables[0]:
@@ -219,6 +224,3 @@ class Executable:
                 value = value.replace(f"${var}", v)
 
         return value
-
-    def _has_parameters(self, method):
-        return "(" in method

@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from typing import List
 
+from src import LOGGER
+from src.core.actions.executable import Executable
 from src.core.enums import TagIncrement, TagReference
 from src.core.models import ActionExecution
 from src.core.template_models import Branch
-from src.core.actions.executable import Executable
 
 
 @dataclass
@@ -31,7 +32,4 @@ class Tag(Executable):
         )
 
     def execute(self):
-        Logger.warn(cls=Tag, msg="Not implemented yet!")
-
-    def _parse(self):
-        pass
+        LOGGER.warn("Not implemented yet!")

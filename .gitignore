@@ -1,5 +1,5 @@
 # ignore everything
-*
+/*
 
 # accept
 !src/
