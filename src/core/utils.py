@@ -11,3 +11,7 @@ def list_functions(mod):
         for func in mod.__dict__.values()
         if is_mod_function(mod, func)
     ]
+
+
+def raiser(ex: BaseException = None):
+    raise ex

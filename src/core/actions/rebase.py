@@ -1,5 +1,4 @@
 from src.core.actions.executable import Executable
-from src.core.logger import Logger
 
 
 class Rebase(Executable):

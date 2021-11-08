@@ -7,13 +7,13 @@ from src.core.enums import TagIncrement, TagReference, Action
 
 @dataclass
 class Affix:
-    prefix: str = None
-    suffix: str = None
+    prefix: List[str] = None
+    suffix: List[str] = None
     join_char: str = None
 
     def __init__(self, affix: Dict):
-        self.prefix = affix.get("prefix", "")
-        self.suffix = affix.get("suffix", "")
+        self.prefix = affix.get("prefix", [])
+        self.suffix = affix.get("suffix", [])
         self.join_char = affix.get("join_char", "/")
 
 
@@ -42,33 +42,6 @@ class Branch:
 @dataclass
 class Parameters(ABC):
     pass
-
-
-@dataclass
-class DeleteBranchParameters:
-    source: Branch = None
-    pattern: Pattern = None
-
-
-@dataclass
-class MergeParameters:
-    source: Type[Branch] = None
-    target: List[Branch] = None
-    allow_new_merge: bool = None
-
-
-@dataclass
-class MergeRequestParameters:
-    source: Type[Branch] = None
-    target: Type[Branch] = None
-    mr_template: str = None
-
-
-@dataclass
-class TagParameters:
-    reference: Type[TagReference] = None
-    increment: Type[TagIncrement] = None
-    target: List[Branch] = None
 
 
 @dataclass

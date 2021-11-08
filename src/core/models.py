@@ -15,3 +15,10 @@ class ActionExecution:
     variables: Dict = None
     parameters: Dict = None
     arguments: List[str] = None
+
+
+@dataclass
+class Choice:
+    index: int = 0
+    choice: str = None
+    text: str = None

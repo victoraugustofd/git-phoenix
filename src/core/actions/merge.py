@@ -1,147 +1,96 @@
 import re
 import ast
+from typing import Type, List
 
+import questionary
+from src.core.models import ActionExecution
+from src.core.template_models import Branch
 from src.core.phoenix import define_pattern, read_input, determine_pattern
-from src.core.actions.executable import Executable
-from src.core.logger import Logger
+from src.core.actions.executable import (
+    Executable,
+    _validate_pattern,
+    _validate_branch_patterns,
+)
 from src.core import merge
+from dataclasses import dataclass
+
+
+@dataclass
+class MergeParameters:
+    source: Branch = None
+    targets: List[Branch] = None
+    allow_new_merge: bool = None
+
+
+@dataclass
+class MergeRequestParameters:
+    source: Branch = None
+    target: Branch = None
+    mr_template: str = None
 
 
 class Merge(Executable):
-    def __init__(self, execution, action_execution):
-        super().__init__(execution, action_execution)
+    parameters: MergeParameters = None
+
+    def __init__(self, action_execution: ActionExecution):
+        super().__init__(action_execution)
+        action_parameters = self.action_execution.parameters
+
+        self.parameters = MergeParameters(
+            source=Branch(action_parameters.get("source", {})),
+            targets=[
+                Branch(branch)
+                for branch in action_parameters.get("targets", {})
+            ],
+            allow_new_merge=action_parameters.get("allow_new_merge", {}),
+        )
 
     def execute(self):
-        if hasattr(self, "origin_pattern"):
-            pattern = re.compile(self.origin_pattern)
+        source = self.parameters.source
+        targets = self.parameters.targets
+        allow_new_merge = self.parameters.allow_new_merge
 
-            if not pattern.match(self.origin):
-                pattern_msg = None
+        _validate_pattern(source.pattern, source.name, "Source name invalid")
+        _validate_branch_patterns(targets, "Target name invalid")
 
-                if hasattr(self, "origin_pattern_example"):
-                    pattern_msg = self.origin_pattern_example
-                else:
-                    pattern_msg = self.origin_pattern
+        confirmed = questionary.confirm(
+            message=f"Você confirma o merge da "
+            f"branch {source.name} com a(s) branch(es) "
+            f"{[','.join(branch.name) for branch in targets]}?"
+        ).ask()
 
-                Logger.warn(
-                    cls=Merge,
-                    msg=(
-                        "You are merging branch"
-                        + PythonCommons.LIGHT_CYAN
-                        + " {}"
-                        + PythonCommons.NC
-                        + ". Merge a branch with this name pattern: "
-                        + PythonCommons.LIGHT_CYAN
-                        + "{}"
-                        + PythonCommons.NC
-                    ).format(self.origin, pattern_msg),
-                )
-                Logger.error(
-                    cls=Merge,
-                    msg="Invalid source! Please execute the command with a valid source branch!",
-                )
-
-        all_destinations = self.destination[:]
-
-        for destination in self.destination:
-            try:
-                all_destinations.pop(0)
-                merge(self.origin, destination, self.allow_merge_again)
-            except ExecutionException:
-                if len(all_destinations) > 0:
-                    Logger.warn(
-                        cls=Merge,
-                        msg=(
-                            "Due to the conflict, the branch"
-                            + PythonCommons.LIGHT_CYAN
-                            + " {} "
-                            + PythonCommons.NC
-                            + "couldn't be merged with branch(es)"
-                            + PythonCommons.LIGHT_CYAN
-                            + " {}"
-                            + PythonCommons.NC
-                            + "!"
-                        ).format(self.origin, ", ".join(all_destinations)),
-                    )
-
-                raise ExecutionException()
-
-    def _parse(self):
-        if not hasattr(self, "source"):
-            if [] == self.execution.args[0:]:
-                self.origin = read_input(
-                    cls=Merge, msg="Inform the source branch name:"
-                )
-            else:
-                self.origin = self.execution.args[0]
-
-        if hasattr(self, "origin_pattern"):
-            self.origin_pattern = determine_pattern(self.origin_pattern)
-
-        if not hasattr(self, "destination"):
-            if not hasattr(self, "destination_strategy"):
-                if [] == self.execution.args[1:]:
-                    self.destination = read_input(
-                        cls=Merge, msg="Inform the destination branch(es):"
-                    ).split(" ")
-                else:
-                    self.destination = [self.execution.args[1]]
-            else:
-                strategy = self.destination_strategy["strategy"]
-
-                if strategy == "search_pattern":
-                    pattern = self.destination_strategy["pattern"]
-
-                    for i in range(len(pattern)):
-                        pattern[i] = self._change_value(pattern[i])
-
-                    index_to_search = self.destination_strategy["index"]
-                    pattern_to_search = define_pattern(
-                        pattern[index_to_search], False, False
-                    )
-
-                    pattern_found = re.search(
-                        pattern_to_search, self.origin
-                    ).group(0)
-                    pattern[index_to_search] = pattern_found
-
-                    self.destination = [
-                        PhoenixCommons.determine_prefix(pattern)
-                    ]
-                else:
-                    Logger.error(
-                        cls=Merge,
-                        msg=(
-                            "Strategy"
-                            + PythonCommons.LIGHT_PURPLE
-                            + " {} "
-                            + PythonCommons.NC
-                            + "not implemented yet!"
-                        ).format(strategy),
-                    )
-        if hasattr(self, "allow_merge_again"):
-            self.allow_merge_again = self.allow_merge_again
-        else:
-            self.allow_merge_again = False
-
-    def confirm_execution(self):
-        destination = ", ".join(self.destination)
-
-        return super()._confirm_execution(
-            cls=Merge,
-            msg=(
-                "Confirm merging branch"
-                + PythonCommons.LIGHT_CYAN
-                + " {} "
-                + PythonCommons.NC
-                + "into"
-                + PythonCommons.LIGHT_CYAN
-                + " {}"
-                + PythonCommons.NC
-                + "?"
-            ).format(self.origin, destination),
-        )
+        if confirmed:
+            for target in targets:
+                targets.pop(0)
+                merge(source.name, target.name, allow_new_merge)
 
 
 class MergeRequest(Executable):
-    pass
+    parameters: MergeRequestParameters = None
+
+    def __init__(self, action_execution: ActionExecution):
+        super().__init__(action_execution)
+        action_parameters = self.action_execution.parameters
+
+        self.parameters = MergeRequestParameters(
+            source=Branch(action_parameters.get("source", {})),
+            target=Branch(action_parameters.get("target", {})),
+            mr_template=action_parameters.get("mr_template", {}),
+        )
+
+    def execute(self):
+        source = self.parameters.source
+        target = self.parameters.target
+        mr_template = self.parameters.mr_template
+
+        _validate_pattern(source.pattern, source.name, "Source name invalid")
+        _validate_pattern(target.pattern, target.name, "Target name invalid")
+
+        confirmed = questionary.confirm(
+            message=f"Você confirma abrir o merge request da "
+            f"branch {source.name} com a(s) branch(es) "
+            f"{target.name}?"
+        ).ask()
+
+        if confirmed:
+            merge(source.name, target.name)

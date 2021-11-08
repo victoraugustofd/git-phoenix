@@ -1,17 +1,20 @@
 import re
 from typing import List, Dict
 
+import questionary
 from regex import regex
 
+from src.core.phoenix_questionary import select
 from src.core import template_methods
 from src.core.exceptions import (
     InvalidPatternException,
     InvalidVariableException,
+    InvalidTemplateException,
     MethodNotImplementedException,
 )
-from src.core.models import ActionExecution
+from src.core.models import ActionExecution, Choice
 from src.core.phoenix import read_input
-from src.core.template_models import Pattern
+from src.core.template_models import Pattern, Branch
 from src.core.template_methods import *
 from src.core.utils import list_functions
 
@@ -29,10 +32,23 @@ def _adjust_regex(r: str) -> str:
 def _validate_pattern(pattern: Pattern, text: str, msg: str = None):
     if pattern.regex:
         r = _adjust_regex(pattern.regex)
-        pattern = regex.compile(r)
+        p = regex.compile(r)
 
-        if not pattern.match(text):
-            raise InvalidPatternException(msg)
+        if not p.match(text):
+            if pattern.message:
+                msg = pattern.message
+
+            raise InvalidPatternException(
+                f"Invalid text: {text} | {msg} | Example:"
+                f" {pattern.example}"
+            )
+
+
+def _validate_branch_patterns(branches: List[Branch], msg: str = None):
+    [
+        _validate_pattern(branch.pattern, branch.name, msg)
+        for branch in branches
+    ]
 
 
 def _is_regex(value: str) -> bool:
@@ -55,6 +71,7 @@ class Executable:
     def __init__(self, action_execution: ActionExecution):
         self.action_execution = action_execution
         self.is_implemented = True
+        self.index_method_executed = 0
         self._parse_action_parameters()
 
     def execute(self):
@@ -84,45 +101,78 @@ class Executable:
                 f"Variable {variable} not found on " "template"
             )
 
-    def _change_value(self, value):
+    def _change_value(self, value, execute: bool = True):
         if isinstance(value, str):
-            return self._process_str(value)
+            return self._process_str(value, execute)
         elif isinstance(value, list):
-            return self._process_list(value)
+            return self._process_list(value, execute)
         elif isinstance(value, dict):
-            return self._process_dict(value)
+            return self._process_dict(value, execute)
 
         return value
 
-    def _process_str(self, value: str) -> str:
+    def _process_str(self, value: str, execute: bool = True) -> str:
         if _ismultiplechoice(value):
             return self._process_multiple_choice(value)
         elif _ismethod(value):
-            return self._process_method(value)
+            return self._process_method(value, execute)
         elif _isvariable(value):
             return self._process_variable(value)
 
         return value
 
-    def _process_list(self, value: List) -> List:
-        return [self._change_value(item) for item in value]
+    def _process_list(self, value: List, execute: bool = True) -> List:
+        return [self._change_value(item, execute) for item in value]
 
-    def _process_dict(self, value: Dict) -> Dict:
-        return {k: self._change_value(v) for k, v in value.items()}
+    def _process_dict(self, value: Dict, execute: bool = True) -> Dict:
+        return {k: self._change_value(v, execute) for k, v in value.items()}
 
     def _process_multiple_choice(self, value: str) -> str:
-        if value.startswith("(") and value.endswith(")"):
-            value = value[1:-1]
+        begin = 0
+        end = len(value)
+
+        if value.startswith("("):
+            begin = 1
+        if value.endswith(")"):
+            end = -1
+
+        value = value[begin:end]
+
+        if "user_input" in value and self.action_execution.arguments:
+            index = self.index_method_executed
+            self.index_method_executed += 1
+            return self.action_execution.arguments[index]
+
+        choices = {}
+        choice_index = 1
 
         for choice in value.split(" or "):
-            self._change_value(choice)
+            choices[str(choice_index)] = Choice(
+                choice_index, choice, self._change_value(choice, execute=False)
+            )
 
-    def _process_method(self, value: str) -> str:
+            choice_index += 1
+
+        choice = select(
+                "Escolha uma das opções abaixo:",
+                choices=[f"{k}. {v.text}" for k, v in choices.items()],
+            )
+
+        user_choice = choices.get(
+            choice.get("answer").split(".")[0]
+        ).choice
+
+        return self._change_value(user_choice)
+
+    def _process_method(self, value: str, execute: bool = True) -> str:
         method_definition = value.split("@")[1]
         method_name = method_definition[0 : method_definition.find("(")]
 
         if method_name not in AVAILABLE_METHODS:
             raise MethodNotImplementedException()
+
+        if "user_input" == method_name and self.action_execution.arguments:
+            return self.action_execution.arguments[self.index_method_executed]
 
         original_arguments = method_definition[
             method_definition.find("(") + 1 : method_definition.find(")")
@@ -135,15 +185,21 @@ class Executable:
             k: self._change_value(v) for k, v in parsed_arguments.items()
         }
 
+        parsed_arguments["execute"] = execute
+
         parsed_arguments = ",".join(
-            [f"{k}='{v}'" for k, v in parsed_arguments.items()]
+            [
+                f"{k}='{v}'" if isinstance(v, str) else f"{k}={v}"
+                for k, v in parsed_arguments.items()
+            ]
         )
 
-        method_definition = method_definition.replace(
-            original_arguments, parsed_arguments
-        )
+        method_definition = f"{method_name}({parsed_arguments})"
 
-        return eval(method_definition)
+        try:
+            return eval(method_definition)
+        except TypeError as e:
+            raise InvalidTemplateException()
 
     def _process_variable(self, value: str) -> str:
         variables = value.split("$")[1:]
@@ -160,7 +216,7 @@ class Executable:
                 if _is_regex(v):
                     v = v.replace("^", "").replace("$", "")
 
-                value = value.replace("$" + var, v)
+                value = value.replace(f"${var}", v)
 
         return value
 

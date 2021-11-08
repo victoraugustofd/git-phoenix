@@ -1,11 +1,13 @@
 from dataclasses import dataclass
 
+import questionary
+
+from src.core.phoenix_questionary import confirm
 from src.core.actions.executable import Executable
 from src.core.actions.executable import _validate_pattern
 from src.core.git import checkout_new_branch
 from src.core.models import ActionExecution
 from src.core.template_models import Branch, Affix, Pattern
-from src.core.logger import Logger
 
 
 @dataclass
@@ -40,9 +42,19 @@ class CreateBranch(Executable):
         _validate_pattern(pattern, name, "Name invalid")
 
         if affix:
-            if affix.prefix:
-                name = affix.join_char.join([affix.prefix, name])
-            if affix.suffix:
-                name = affix.join_char.join([name, affix.suffix])
+            final_name = [name]
 
-        checkout_new_branch(source=source.name, branch=name)
+            if affix.prefix:
+                final_name = affix.prefix + final_name
+                name = affix.join_char.join(final_name)
+            if affix.suffix:
+                final_name.extend(affix.suffix)
+                name = affix.join_char.join(final_name)
+
+        confirmed = confirm(msg=f"Você confirma a criação da "
+            f"branch {name} com base na "
+            f"branch {source.name}?"
+        )
+
+        if confirmed:
+            checkout_new_branch(source=source.name, branch=name)

@@ -1,59 +1,78 @@
-import importlib.resources as lib_resources
 import json
-import sys
 from json import JSONDecodeError
 from typing import List, Dict
 
 import click
-import questionary
 from jsonschema import validate, ValidationError
-from questionary import Style
 
+from src import LOGGER, PHOENIX_SCHEMA
 from src.core.exceptions import (
     InvalidTemplateException,
     CommandNotFoundException,
     ActionNotFoundException,
     ShowHelpException,
     PhoenixException,
+    ProcessCancelledException,
 )
 from src.core.git import require_git_repo
 from src.core.models import Execution
 from src.core.phoenix import get_template
+from src.core.phoenix_questionary import select
 from src.core.rules import fire_rules
-from . import resources
 
-PHOENIX_SCHEMA = json.loads(
-    lib_resources.read_text(resources, "phoenix-schema.json")
+
+@click.command(
+    context_settings=dict(
+        allow_extra_args=True,
+        ignore_unknown_options=True,
+    )
 )
-CUSTOM_STYLE = Style(
-    [
-        ("qmark", "fg:#673ab7 bold"),  # token in front of the question
-        ("question", "fg:#673ab7 bold"),  # question text
-        (
-            "answer",
-            "fg:#f44336 bold",
-        ),  # submitted answer text behind the question
-        (
-            "pointer",
-            "fg:#ff0000 bold",
-        ),  # pointer used in select and checkbox prompts
-        (
-            "highlighted",
-            "fg:#673ab7 bold",
-        ),  # pointed-at choice in select and checkbox prompts
-        ("selected", "fg:#cc5454"),  # style for a selected item of a checkbox
-        ("separator", "fg:#cc5454"),  # separator in lists
-        (
-            "instruction",
-            "",
-        ),  # user instructions for select, rawselect, checkbox
-        ("text", ""),  # plain text
-        (
-            "disabled",
-            "fg:#858585 italic",
-        ),  # disabled choices for select and checkbox prompts
-    ]
+@click.version_option(
+    package_name="git-phoenix",
+    prog_name="Git Phoenix",
 )
+@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+def main(args):
+    try:
+        print("\n-#- P H O E N I X  B E G I N -#-\n")
+
+        LOGGER.info("Iniciando processamento...")
+
+        require_git_repo()
+        template = _get_template()
+
+        try:
+            validate(instance=template, schema=PHOENIX_SCHEMA)
+
+            command = _get_command(args=args, template=template)
+            action = _get_action(args=args, command=command)
+            variables = template.get("variables")
+            arguments = args[2:]
+
+            # Create execution object to carry template and
+            # arguments through execution
+            execution = Execution(
+                command=command,
+                action=action,
+                variables=variables,
+                arguments=arguments,
+            )
+
+            LOGGER.info("Executando regras...")
+
+            fire_rules(execution)
+        except ValidationError as e:
+            raise InvalidTemplateException(e.message)
+    except PhoenixException as e:
+        if type(e) == ProcessCancelledException:
+            LOGGER.warn(e.message)
+        else:
+            LOGGER.exception(e.message)
+
+    except Exception as e:
+        LOGGER.exception(str(e))
+
+    print("\n-#- P H O E N I X  E N D -#-")
 
 
 def _is_argument(arg):
@@ -63,7 +82,7 @@ def _is_argument(arg):
 def _get_template():
     template_path = get_template()
 
-    with open(template_path) as template_file:
+    with open(template_path, encoding="utf-8") as template_file:
         try:
             return json.load(template_file)
         except JSONDecodeError as e:
@@ -92,15 +111,11 @@ def _get_commands(template) -> List[str]:
 
 
 def _get_command_by_template(template) -> Dict:
-    command = questionary.form(
-        command_name=questionary.select(
-            "Choose one of the commands below",
-            choices=_get_commands(template),
-            style=CUSTOM_STYLE,
-        )
-    ).ask()
+    command = select(
+        msg="Escolha um dos comandos abaixo:", choices=_get_commands(template)
+    )
 
-    command = command.get("command_name")
+    command = command.get("answer")
 
     return _get_command_by_name(command, template)
 
@@ -119,16 +134,16 @@ def _get_actions(command) -> List[str]:
     return [action.get("name") for action in command.get("actions")]
 
 
-def _get_action_by_command(command) -> Dict:
-    action = questionary.form(
-        action_name=questionary.select(
-            "Choose one of the actions below",
-            choices=_get_actions(command),
-            style=CUSTOM_STYLE,
-        )
-    ).ask()
+# def _get_actions_alias(command) -> List[str]:
+#     return [action.get("alias") for action in command.get("actions")]
 
-    action = action.get("action_name")
+
+def _get_action_by_command(command) -> Dict:
+    action = select(
+        msg="Escolha uma das ações abaixo:", choices=_get_actions(command)
+    )
+
+    action = action.get("answer")
 
     return _get_action_by_name(action, command)
 
@@ -162,6 +177,7 @@ def _passed_action(args: List[str]) -> bool:
 
 def _get_action_by_argument(action: str, command: Dict):
     actions = _get_actions(command)
+    # actions_alias = _get_actions_alias(command)
 
     if action not in actions:
         raise ActionNotFoundException(action)
@@ -191,48 +207,3 @@ def _get_action(args, command):
         return action
     else:
         return _get_action_by_command(command)
-
-
-@click.command(
-    context_settings=dict(
-        allow_extra_args=True,
-        ignore_unknown_options=True,
-    )
-)
-@click.version_option(
-    package_name="git-phoenix",
-    prog_name="Git Phoenix",
-)
-def main(*args, **kwargs):
-    try:
-        args = sys.argv[1:]
-
-        require_git_repo()
-        template = _get_template()
-
-        try:
-            validate(instance=template, schema=PHOENIX_SCHEMA)
-
-            command = _get_command(args=args, template=template)
-            action = _get_action(args=args, command=command)
-            variables = template.get("variables")
-            arguments = args[2:]
-
-            # Create execution object to carry template and
-            # arguments through execution
-            execution = Execution(
-                command=command,
-                action=action,
-                variables=variables,
-                arguments=arguments,
-            )
-
-            print("Firing rules...")
-
-            fire_rules(execution)
-        except ValidationError as e:
-            raise InvalidTemplateException(e.message)
-    except PhoenixException as e:
-        print(e.message)
-    except Exception as e:
-        print(str(e))

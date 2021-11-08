@@ -69,3 +69,13 @@ class InvalidVariableException(PhoenixException):
 @dataclass
 class MethodNotImplementedException(PhoenixException):
     message: str = None
+
+
+@dataclass
+class BranchAlreadyExistsException(PhoenixException):
+    message: str = "Branch already exists"
+
+
+@dataclass
+class ProcessCancelledException(PhoenixException):
+    message: str = None

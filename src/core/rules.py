@@ -1,3 +1,4 @@
+from src import LOGGER
 from src.core.exceptions import UnstagedFilesException, BranchAheadException
 from src.core.git import has_unstaged_files, is_ahead
 from src.core.models import Execution, ActionExecution
@@ -25,7 +26,7 @@ def fire_rules(execution: Execution):
         do = action_execution.get("do")
         action_from_template = do.get("action")
 
-        print(f"Validating method {action_from_template}...")
+        LOGGER.info(f"Validando método {action_from_template}...")
 
         action_class = eval(capitalize_first_letter(action_from_template))
 
@@ -48,21 +49,7 @@ def fire_rules(execution: Execution):
     # ]
 
     for action in actions:
-        # Logger.info(
-        #     self=Rules,
-        #     msg=(
-        #         (
-        #             "Executing method "
-        #             + PythonCommons.LIGHT_GREEN
-        #             + "{}"
-        #             + PythonCommons.NC
-        #             + "..."
-        #         ).format(action.action_execution["do"]["action"])
-        #     ),
-        # )
-        # try:
         action.execute()
-        # except ExecutionException:
         #     if len(all_actions) > 0:
         #         Logger.error(
         #             self=Rules,

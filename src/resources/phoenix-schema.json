@@ -171,7 +171,7 @@
                   "source": {
                     "$ref": "#branch"
                   },
-                  "target": {
+                  "targets": {
                     "type": "array",
                     "items": {
                       "$ref": "#branch"
@@ -183,7 +183,7 @@
                   }
                 },
                 "required": [
-                  "target"
+                  "targets"
                 ],
                 "additionalProperties": false
               }
@@ -245,7 +245,7 @@
                       "patch"
                     ]
                   },
-                  "target": {
+                  "targets": {
                     "type": "array",
                     "items": {
                       "$ref": "#branch"
@@ -254,7 +254,7 @@
                   }
                 },
                 "required": [
-                  "target"
+                  "targets"
                 ],
                 "anyOf": [
                   {

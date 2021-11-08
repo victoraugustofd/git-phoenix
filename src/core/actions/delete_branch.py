@@ -1,7 +1,16 @@
+from dataclasses import dataclass
+
 import regex
 import sys
+
+from src.core.template_models import Branch, Pattern
 from src.core.actions.executable import Executable
-from src.core.logger import Logger
+
+
+@dataclass
+class DeleteBranchParameters:
+    source: Branch = None
+    pattern: Pattern = None
 
 
 class DeleteBranch(Executable):

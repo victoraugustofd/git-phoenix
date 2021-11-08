@@ -1,7 +1,10 @@
 import git
 from git import GitCommandError, Repo
 
-from src.core.exceptions import NotAGitRepoException
+from src.core.exceptions import (
+    NotAGitRepoException,
+    BranchAlreadyExistsException,
+)
 
 GIT_REPO: Repo
 
@@ -12,6 +15,13 @@ def get_config(key):
         return GIT_REPO.git.config(key)
     except GitCommandError:
         return f"Config {key} not found"
+
+
+def get_tags():
+    global GIT_REPO
+    return [
+        version.replace("v", "") for version in GIT_REPO.git.tag().split("\n")
+    ]
 
 
 def require_git_repo():
@@ -73,6 +83,15 @@ def checkout(branch):
     GIT_REPO.git.checkout(branch)
 
 
+def _validate_existence(branch):
+    global GIT_REPO
+    remotes = [branch.name.replace("origin/", "") for branch in GIT_REPO.refs]
+    local = GIT_REPO.branches
+
+    if branch in remotes or branch in local:
+        raise BranchAlreadyExistsException()
+
+
 def checkout_new_branch(source, branch):
     checkout(source)
     pull(source)
@@ -91,6 +110,8 @@ def checkout_new_branch(source, branch):
     #     ).format(branch, source),
     # )
     try:
+        _validate_existence(branch)
+
         GIT_REPO.git.checkout(source, b=branch)
     except GitCommandError:
         pass
@@ -106,12 +127,12 @@ def checkout_new_branch(source, branch):
         # )
 
 
-def merge(branch, destination, allow_merge_again):
+def merge(branch, target, allow_merge_again):
     git = Repo(".", search_parent_directories=True).git
 
-    if allow_merge_again or not _already_merged(destination, branch):
-        checkout(destination)
-        pull(destination)
+    if allow_merge_again or not _already_merged(target, branch):
+        checkout(target)
+        pull(target)
         Logger.info(
             cls=GitCommons,
             msg=(
@@ -124,7 +145,7 @@ def merge(branch, destination, allow_merge_again):
                 + " {}"
                 + PythonCommons.NC
                 + "..."
-            ).format(branch, destination),
+            ).format(branch, target),
         )
 
         try:
@@ -148,7 +169,7 @@ def merge(branch, destination, allow_merge_again):
                 + " {}"
                 + PythonCommons.NC
                 + "!"
-            ).format(branch, destination),
+            ).format(branch, target),
         )
 
 
@@ -171,13 +192,20 @@ def pull(branch):
 
 def delete(pattern):
     git = Repo(".", search_parent_directories=True).git
-    Logger.info(cls=GitCommons, msg=("Deleting branch(es) " +
-                                     PythonCommons.LIGHT_CYAN +
-                                     "{}" +
-                                     PythonCommons.NC +
-                                     "...").format(pattern))
+    Logger.info(
+        cls=GitCommons,
+        msg=(
+            "Deleting branch(es) "
+            + PythonCommons.LIGHT_CYAN
+            + "{}"
+            + PythonCommons.NC
+            + "..."
+        ).format(pattern),
+    )
 
-    branches = [branch.replace(" ", "") for branch in git.branch().splitlines()]
+    branches = [
+        branch.replace(" ", "") for branch in git.branch().splitlines()
+    ]
     branches = list(filter(lambda x: x.startswith(pattern), branches))
     [git.execute(["git", "branch", "-D", branch]) for branch in branches]
 
@@ -218,7 +246,7 @@ def _translate_merge_message(msg):
     origin = origin[: origin.index(" ")]
 
     translated_merge_message["source"] = origin.replace("'", "")
-    translated_merge_message["destination"] = msg.split("into ")[-1].replace(
+    translated_merge_message["target"] = msg.split("into ")[-1].replace(
         "'", ""
     )
 
