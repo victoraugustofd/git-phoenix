@@ -39,7 +39,7 @@ coloredlogs.DEFAULT_LEVEL_STYLES = {
     "warning": {"color": "yellow"},
 }
 
-coloredlogs.install(level="DEBUG", logger=LOGGER, fmt=fmt, milliseconds=True)
+coloredlogs.install(level="INFO", logger=LOGGER, fmt=fmt, milliseconds=True)
 
 CUSTOM_STYLE = Style(
     [
