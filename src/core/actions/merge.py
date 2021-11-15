@@ -1,34 +1,34 @@
 from dataclasses import dataclass
 from typing import List
 
-import questionary
 
-from src.core import merge
+from src.core import merge, merge_request
 from src.core.actions.executable import (
     Executable,
     _validate_pattern,
     _validate_branch_patterns,
 )
 from src.core.models import ActionExecution
+from src.core.px_questionary import confirm
 from src.core.template_models import Branch
 
 
 @dataclass
 class MergeParameters:
-    source: Branch = None
-    targets: List[Branch] = None
-    allow_new_merge: bool = None
+    source: Branch
+    targets: List[Branch]
+    allow_new_merge: bool
 
 
 @dataclass
 class MergeRequestParameters:
-    source: Branch = None
-    target: Branch = None
-    mr_template: str = None
+    source: Branch
+    target: Branch
+    mr_template: str
 
 
 class Merge(Executable):
-    parameters: MergeParameters = None
+    parameters: MergeParameters
 
     def __init__(self, action_execution: ActionExecution):
         super().__init__(action_execution)
@@ -51,11 +51,11 @@ class Merge(Executable):
         _validate_pattern(source.pattern, source.name, "Source name invalid")
         _validate_branch_patterns(targets, "Target name invalid")
 
-        confirmed = questionary.confirm(
-            message=f"Você confirma o merge da "
+        confirmed = confirm(
+            msg=f"Você confirma o merge da "
             f"branch {source.name} com a(s) branch(es) "
             f"{[','.join(branch.name) for branch in targets]}?"
-        ).ask()
+        )
 
         if confirmed:
             for target in targets:
@@ -64,7 +64,7 @@ class Merge(Executable):
 
 
 class MergeRequest(Executable):
-    parameters: MergeRequestParameters = None
+    parameters: MergeRequestParameters
 
     def __init__(self, action_execution: ActionExecution):
         super().__init__(action_execution)
@@ -84,11 +84,11 @@ class MergeRequest(Executable):
         _validate_pattern(source.pattern, source.name, "Source name invalid")
         _validate_pattern(target.pattern, target.name, "Target name invalid")
 
-        confirmed = questionary.confirm(
-            message=f"Você confirma abrir o merge request da "
+        confirmed = confirm(
+            f"Você confirma abrir o merge request da "
             f"branch {source.name} com a(s) branch(es) "
             f"{target.name}?"
-        ).ask()
+        )
 
         if confirmed:
-            merge(source.name, target.name)
+            merge_request(source.name, target.name, True, mr_template)

@@ -2,31 +2,31 @@ from dataclasses import dataclass
 
 import questionary
 
-from src.core.phoenix_questionary import confirm
+from src.core.px_questionary import confirm
 from src.core.actions.executable import Executable
 from src.core.actions.executable import _validate_pattern
-from src.core.git import checkout_new_branch
+from src.core.px_git import checkout_new_branch
 from src.core.models import ActionExecution
 from src.core.template_models import Branch, Affix, Pattern
 
 
 @dataclass
 class CreateBranchParameters:
-    name: str = None
-    source: Branch = None
-    affix: Affix = None
-    pattern: Pattern = None
+    name: str
+    source: Branch
+    affix: Affix
+    pattern: Pattern
 
 
 class CreateBranch(Executable):
-    parameters: CreateBranchParameters = None
+    parameters: CreateBranchParameters
 
     def __init__(self, action_execution: ActionExecution):
         super().__init__(action_execution)
         action_parameters = self.action_execution.parameters
 
         self.parameters = CreateBranchParameters(
-            name=action_parameters.get("name"),
+            name=action_parameters.get("name", ""),
             source=Branch(action_parameters.get("source", {})),
             affix=Affix(action_parameters.get("affix", {})),
             pattern=Pattern(action_parameters.get("pattern", {})),

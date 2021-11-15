@@ -1,11 +1,9 @@
-import re
+from abc import ABC
 from typing import List, Dict
 
-import questionary
 from regex import regex
 
 from src import LOGGER
-from src.core.phoenix_questionary import select
 from src.core import template_methods
 from src.core.exceptions import (
     InvalidPatternException,
@@ -14,9 +12,8 @@ from src.core.exceptions import (
     MethodNotImplementedException,
 )
 from src.core.models import ActionExecution, Choice
-from src.core.phoenix import read_input
+from src.core.px_questionary import select
 from src.core.template_models import Pattern, Branch
-from src.core.template_methods import *
 from src.core.utils import list_functions
 
 AVAILABLE_METHODS = list_functions(template_methods)
@@ -30,7 +27,7 @@ def _adjust_regex(r: str) -> str:
     return r.replace("/", "\/")
 
 
-def _validate_pattern(pattern: Pattern, text: str, msg: str = None):
+def _validate_pattern(pattern: Pattern, text: str, msg: str):
     if pattern.regex:
         r = _adjust_regex(pattern.regex)
         p = regex.compile(r)
@@ -40,16 +37,13 @@ def _validate_pattern(pattern: Pattern, text: str, msg: str = None):
                 msg = pattern.message
 
             raise InvalidPatternException(
-                f"Invalid text: {text} | {msg} | Example:"
-                f" {pattern.example}"
+                f"Invalid text: {text} | {msg} | Example: {pattern.example}"
             )
 
 
-def _validate_branch_patterns(branches: List[Branch], msg: str = None):
-    [
+def _validate_branch_patterns(branches: List[Branch], msg: str):
+    for branch in branches:
         _validate_pattern(branch.pattern, branch.name, msg)
-        for branch in branches
-    ]
 
 
 def _is_regex(value: str) -> bool:
@@ -68,7 +62,7 @@ def _ismultiplechoice(value: str) -> bool:
     return " or " in value
 
 
-class Executable:
+class Executable(ABC):
     def __init__(self, action_execution: ActionExecution):
         self.action_execution = action_execution
         self.is_implemented = True
@@ -76,7 +70,7 @@ class Executable:
         self._parse_action_parameters()
 
     def execute(self):
-        pass
+        raise NotImplementedError("This is an abstract method!")
 
     def _parse_action_parameters(self):
         LOGGER.info("Realizando parse da ação no template...")
@@ -155,13 +149,13 @@ class Executable:
             choice_index += 1
 
         choice = select(
-                "Escolha uma das opções abaixo:",
-                choices=[f"{k}. {v.text}" for k, v in choices.items()],
-            )
+            "Escolha uma das opções abaixo:",
+            choices=[f"{k}. {v.text}" for k, v in choices.items()],
+        )
 
         user_choice = choices.get(
             choice.get("answer").split(".")[0]
-        ).choice
+        ).choice_text
 
         return self._change_value(user_choice)
 
@@ -200,8 +194,9 @@ class Executable:
         method_definition = f"{method_name}({parsed_arguments})"
 
         try:
-            return eval(method_definition)
+            return eval(f"template_methods.{method_definition}")
         except TypeError as e:
+            LOGGER.error(str(e))
             raise InvalidTemplateException()
 
     def _process_variable(self, value: str) -> str:
@@ -210,9 +205,9 @@ class Executable:
         variables = value.split("$")[1:]
 
         if "self" == variables[0]:
-            pass
+            pass  # this method will be implemented on version 1.1.0
         elif "version" == variables[0]:
-            pass
+            pass  # this method will be implemented on version 1.1.0
         else:
             for variable in variables:
                 var = variable.replace("/", "")

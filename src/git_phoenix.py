@@ -3,6 +3,7 @@ from json import JSONDecodeError
 from typing import List, Dict
 
 import click
+from click import UNPROCESSED
 from jsonschema import validate, ValidationError
 
 from src import LOGGER, PHOENIX_SCHEMA
@@ -12,13 +13,13 @@ from src.core.exceptions import (
     ActionNotFoundException,
     ShowHelpException,
     PhoenixException,
-    ProcessCancelledException,
+    PhoenixWarningException,
 )
-from src.core.git import require_git_repo
 from src.core.models import Execution
-from src.core.phoenix import get_template
-from src.core.phoenix_questionary import select
+from src.core.px_git import require_git_repo
+from src.core.px_questionary import select
 from src.core.rules import fire_rules
+from src.core.utils import get_template, px_print
 
 
 @click.command(
@@ -31,10 +32,10 @@ from src.core.rules import fire_rules
     package_name="git-phoenix",
     prog_name="Git Phoenix",
 )
-@click.argument("args", nargs=-1, type=click.UNPROCESSED)
+@click.argument("args", nargs=-1, type=UNPROCESSED)
 def main(args):
     try:
-        print("\n-#- P H O E N I X  B E G I N -#-\n")
+        px_print("\n-#- P H O E N I X  B E G I N -#-\n")
 
         LOGGER.info("Iniciando processamento...")
 
@@ -65,16 +66,14 @@ def main(args):
             fire_rules(execution)
         except ValidationError as e:
             raise InvalidTemplateException(e.message)
+    except PhoenixWarningException as e:
+        LOGGER.warn(e.message)
     except PhoenixException as e:
-        if type(e) == ProcessCancelledException:
-            LOGGER.warn(e.message)
-        else:
-            LOGGER.exception(e.message)
-
+        LOGGER.exception(e.message)
     except Exception as e:
         LOGGER.exception(str(e))
 
-    print("\n-#- P H O E N I X  E N D -#-")
+    px_print("\n-#- P H O E N I X  E N D -#-")
 
 
 def _is_argument(arg):
@@ -89,10 +88,7 @@ def _get_template():
             return json.load(template_file)
         except JSONDecodeError as e:
             raise InvalidTemplateException(
-                f"{e.msg} - Error at line:"
-                f" {e.lineno} "
-                f"and "
-                f"column: {e.colno}"
+                f"{e.msg} - Error at line:{e.lineno} and column: {e.colno}"
             )
 
 
@@ -117,8 +113,6 @@ def _get_command_by_template(template) -> Dict:
         msg="Escolha um dos comandos abaixo:", choices=_get_commands(template)
     )
 
-    command = command.get("answer")
-
     return _get_command_by_name(command, template)
 
 
@@ -132,8 +126,8 @@ def _get_command_by_name(command, template):
     )
 
 
-def _get_actions(command) -> List[str]:
-    return [action.get("name") for action in command.get("actions")]
+def _get_actions(command) -> Dict:
+    return {action.get("name"): action for action in command.get("actions")}
 
 
 # def _get_actions_alias(command) -> List[str]:
@@ -141,13 +135,12 @@ def _get_actions(command) -> List[str]:
 
 
 def _get_action_by_command(command) -> Dict:
+    actions = _get_actions(command)
     action = select(
-        msg="Escolha uma das ações abaixo:", choices=_get_actions(command)
+        msg="Escolha uma das ações abaixo:", choices=actions.keys()
     )
 
-    action = action.get("answer")
-
-    return _get_action_by_name(action, command)
+    return actions.get(action)
 
 
 def _get_action_by_name(action, command):

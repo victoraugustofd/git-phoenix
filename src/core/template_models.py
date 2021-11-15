@@ -7,9 +7,9 @@ from src.core.enums import TagIncrement, TagReference, Action
 
 @dataclass
 class Affix:
-    prefix: List[str] = None
-    suffix: List[str] = None
-    join_char: str = None
+    prefix: List[str]
+    suffix: List[str]
+    join_char: str
 
     def __init__(self, affix: Dict):
         self.prefix = affix.get("prefix", [])
@@ -19,9 +19,9 @@ class Affix:
 
 @dataclass
 class Pattern:
-    regex: str = None
-    message: str = None
-    example: str = None
+    regex: str
+    message: str
+    example: str
 
     def __init__(self, pattern: Dict):
         self.regex = pattern.get("regex", "")
@@ -31,11 +31,11 @@ class Pattern:
 
 @dataclass
 class Branch:
-    name: str = None
-    pattern: Pattern = None
+    name: str
+    pattern: Pattern
 
     def __init__(self, branch: Dict):
-        self.name = branch.get("name")
+        self.name = branch.get("name", "")
         self.pattern = Pattern(branch.get("pattern", {}))
 
 
@@ -46,37 +46,37 @@ class Parameters(ABC):
 
 @dataclass
 class Do:
-    action: Type[Action] = None
-    parameters: Type[Parameters] = None
+    action: Type[Action]
+    parameters: Type[Parameters]
 
 
 @dataclass
 class Execution:
-    step: int = None
-    do: Type[Do] = None
+    step: int
+    do: Type[Do]
 
 
 @dataclass
 class Action:
-    name: str = None
-    alias: str = None
-    execution: List[Execution] = None
+    name: str
+    alias: str
+    execution: List[Execution]
 
 
 @dataclass
 class Command:
-    name: str = None
-    alias: str = None
-    actions: List[Action] = None
+    name: str
+    alias: str
+    actions: List[Action]
 
 
 @dataclass
 class Init:
-    execution: List[Execution] = None
+    execution: List[Execution]
 
 
 @dataclass
 class Template:
-    init: Type[Init] = None
-    commons: Dict = None
-    commands: List[Command] = None
+    init: Type[Init]
+    commons: Dict
+    commands: List[Command]

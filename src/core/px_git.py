@@ -54,12 +54,12 @@ def is_ahead():
 
     try:
         commits_ahead = GIT_REPO.iter_commits(branch + ".." + branch)
-        number_of_commits = sum(1 for c in commits_ahead)
+        number_of_commits = len(commits_ahead)
 
         return number_of_commits > 0
-    except GitCommandError as e:
+    except GitCommandError:
         LOGGER.info(
-            f"Your current branch ({branch}) doesn't exists on remote "
+            f"Your current source ({branch}) doesn't exists on remote "
             f"repo. Please use git push source {branch}."
         )
 
@@ -69,7 +69,7 @@ def retrieve_current_branch():
 
 
 def checkout(branch):
-    LOGGER.info(f"Fazendo checkout da branch {branch}...")
+    LOGGER.info(f"Fazendo checkout da source {branch}...")
 
     GIT_REPO.git.checkout(branch)
 
@@ -87,7 +87,7 @@ def checkout_new_branch(source: str, branch: str):
     checkout(source)
     pull(source)
 
-    LOGGER.info(f"Criando branch {branch} com base na branch {source}...")
+    LOGGER.info(f"Criando source {branch} com base na source {source}...")
 
     try:
         _validate_existence(branch)
@@ -97,16 +97,16 @@ def checkout_new_branch(source: str, branch: str):
         raise GitException(e.stdout)
 
 
-def merge(branch: str, target: str, allow_merge_again: bool):
-    if allow_merge_again or not _already_merged(target, branch):
+def merge(source: str, target: str, allow_merge_again: bool):
+    if allow_merge_again or not _already_merged(target, source):
         checkout(target)
         pull(target)
 
         LOGGER.info(
-            f"Realizando merge da branch {branch} com a branch " f"{target}..."
+            f"Realizando merge da source {source} com a source {target}..."
         )
         try:
-            GIT_REPO.git.merge(branch, "--no-ff")
+            GIT_REPO.git.merge(source, "--no-ff")
         except GitCommandError:
             raise GitException(
                 "O merge gerou conflitos, você precisa "
@@ -114,13 +114,18 @@ def merge(branch: str, target: str, allow_merge_again: bool):
             )
     else:
         LOGGER.warn(
-            f"O merge da branch {branch} com a branch {target} já "
+            f"O merge da source {source} com a source {target} já "
             f"foi realizado!"
         )
 
 
+def merge_request(source: str, target: str, allow_merge_again: bool,
+                  mr_template: str):
+    pass  # this method will be implemented on version 1.1.0
+
+
 def pull(branch):
-    LOGGER.info(f"Atualizando branch {branch}...")
+    LOGGER.info(f"Atualizando source {branch}...")
 
     try:
         GIT_REPO.git.pull()
@@ -129,7 +134,7 @@ def pull(branch):
 
 
 def delete(pattern):
-    LOGGER.info(f"Excluindo branch(es) {pattern}...")
+    LOGGER.info(f"Excluindo source(es) {pattern}...")
 
     branches = [
         branch.replace(" ", "") for branch in git.branch().splitlines()
@@ -137,7 +142,7 @@ def delete(pattern):
 
     branches = list(filter(lambda x: x.startswith(pattern), branches))
 
-    [git.execute(["git", "branch", "-D", branch]) for branch in branches]
+    [git.execute(["git", "source", "-D", branch]) for branch in branches]
 
 
 def _already_merged(destination, branch):
@@ -166,7 +171,7 @@ def log(parameters):
 def _translate_merge_message(msg):
     translated_merge_message = {}
 
-    origin = msg.split("branch ")
+    origin = msg.split("source ")
 
     if origin[1:]:
         origin = origin[1]

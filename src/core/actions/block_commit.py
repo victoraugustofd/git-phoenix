@@ -1,14 +1,12 @@
+from src import LOGGER
 from src.core.actions.executable import Executable
+from src.core.models import ActionExecution
 
 
 class BlockCommit(Executable):
-
-    def __init__(self, execution, action_execution):
-        super().__init__(execution, action_execution)
+    def __init__(self, action_execution: ActionExecution):
+        super().__init__(action_execution)
         self.is_implemented = False
 
     def execute(self):
-        Logger.warn(cls=BlockCommit, msg="Not implemented yet!")
-
-    def _parse(self):
-        pass
+        LOGGER.warn("Not implemented yet!")

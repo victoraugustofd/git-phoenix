@@ -2,7 +2,7 @@ import questionary
 
 from distutils.version import LooseVersion
 
-from src.core.phoenix_questionary import text
+from src.core.px_questionary import text
 from src.core import get_tags
 from src.core.enums import TagIncrement
 
@@ -43,12 +43,12 @@ def get_latest_version(increase: str, execute: bool = True):
 
 
 def get_latest_tag(increase: TagIncrement, execute: bool = True):
-    pass
+    pass  # this method will be implemented on version 1.1.0
 
 
 def get_branch(pattern: str, execute: bool = True):
-    pass
+    pass  # this method will be implemented on version 1.1.0
 
 
 def get_origin_branch(execute: bool = True):
-    pass
+    pass  # this method will be implemented on version 1.1.0

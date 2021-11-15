@@ -23,7 +23,7 @@ class Action(BaseEnum):
 
 
 class TagReference(BaseEnum):
-    BRANCH = "branch"
+    BRANCH = "source"
     TAG = "tag"
 
 

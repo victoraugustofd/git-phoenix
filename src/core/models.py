@@ -4,21 +4,21 @@ from typing import List, Dict
 
 @dataclass
 class Execution:
-    command: Dict = None
-    action: Dict = None
-    variables: Dict = None
-    arguments: List[str] = None
+    command: Dict
+    action: Dict
+    variables: Dict
+    arguments: List[str]
 
 
 @dataclass
 class ActionExecution:
-    variables: Dict = None
-    parameters: Dict = None
-    arguments: List[str] = None
+    variables: Dict
+    parameters: Dict
+    arguments: List[str]
 
 
 @dataclass
 class Choice:
     index: int = 0
-    choice: str = None
-    text: str = None
+    choice_text: str = ""
+    text: str = ""

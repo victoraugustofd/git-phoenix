@@ -10,13 +10,13 @@ from src.core.template_models import Branch
 
 @dataclass
 class TagParameters:
-    reference: TagReference = None
-    increment: TagIncrement = None
-    targets: List[Branch] = None
+    reference: TagReference
+    increment: TagIncrement
+    targets: List[Branch]
 
 
 class Tag(Executable):
-    parameters: TagParameters = None
+    parameters: TagParameters
 
     def __init__(self, action_execution: ActionExecution):
         super().__init__(action_execution)

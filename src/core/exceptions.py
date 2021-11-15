@@ -1,8 +1,13 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List
 
 
-class PhoenixException(BaseException):
-    message: str = None
+class PhoenixException(Exception):
+    message: str
+
+
+class PhoenixWarningException(PhoenixException):
+    message: str
 
 
 @dataclass
@@ -26,8 +31,20 @@ class InvalidExecutionException(PhoenixException):
 
 
 @dataclass
+class InvalidOptionException(PhoenixWarningException):
+    option: str = ""
+    options: List[str] = field(default_factory=list)
+
+    def __post_init__(self):
+        self.message = (
+            f"Invalid option: {self.option} | Valid options: "
+            f"{'|'.join(self.options)}"
+        )
+
+
+@dataclass
 class CommandNotFoundException(PhoenixException):
-    command: str = None
+    command: str
 
     def __post_init__(self):
         self.message = f"Command {self.command} not found!"
@@ -35,7 +52,7 @@ class CommandNotFoundException(PhoenixException):
 
 @dataclass
 class ActionNotFoundException(PhoenixException):
-    action: str = None
+    action: str
 
     def __post_init__(self):
         self.message = f"Action {self.action} not found!"
@@ -51,24 +68,24 @@ class UnstagedFilesException(PhoenixException):
 @dataclass
 class BranchAheadException(PhoenixException):
     message: str = (
-        "You are ahead of remote branch! Please push your "
+        "You are ahead of remote source! Please push your "
         "changes before proceeding."
     )
 
 
 @dataclass
 class ShowHelpException(PhoenixException):
-    message: str = None
+    message: str
 
 
 @dataclass
 class InvalidVariableException(PhoenixException):
-    message: str = None
+    message: str
 
 
 @dataclass
 class MethodNotImplementedException(PhoenixException):
-    message: str = None
+    message: str
 
 
 @dataclass
@@ -77,10 +94,15 @@ class BranchAlreadyExistsException(PhoenixException):
 
 
 @dataclass
-class ProcessCancelledException(PhoenixException):
-    message: str = None
+class ProcessCancelledException(PhoenixWarningException):
+    message: str
 
 
 @dataclass
 class GitException(PhoenixException):
-    message: str = None
+    message: str
+
+
+@dataclass
+class NonPassedArgumentsException(PhoenixException):
+    message: str = "You must pass arguments for Phoenix to process!"
