@@ -6,6 +6,7 @@ jobs:
   run-linters:
     name: Run linters
     runs-on: ubuntu-latest
+    continue-on-error: false
 
     steps:
       - name: Check out Git repository
