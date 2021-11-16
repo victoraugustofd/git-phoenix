@@ -24,3 +24,4 @@ jobs:
         with:
           black: true
           flake8: true
+          flake8_args: --exclude F401,E203
