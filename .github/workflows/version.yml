@@ -20,6 +20,7 @@ jobs:
           IFS=' = ' read -r -a version <<< "$version"
           version="${version[1]}"
           version=$(echo "$version" | sed "s/\"/\ /g")
+          echo $version
 
       - name: Change version
         id: change-version
