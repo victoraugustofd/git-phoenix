@@ -9,4 +9,4 @@ class BlockCommit(Executable):
         self.is_implemented = False
 
     def execute(self):
-        LOGGER.warn("Not implemented yet!")
+        LOGGER.debug("Not implemented yet!")
