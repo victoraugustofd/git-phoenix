@@ -10,9 +10,12 @@ HERE = pathlib.Path(__file__).parent
 # The text of the README file
 README = (HERE / "README.md").read_text()
 
+# Package version
+VERSION = "1.0.6"
+
 setup(
     name="git-phoenix",
-    version="1.0.6",
+    version=VERSION,
     description="A dynamic git branching tool",
     long_description=README,
     long_description_content_type="text/markdown",
