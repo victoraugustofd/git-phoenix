@@ -1,6 +1,10 @@
 name: Version
 
-on: push
+on:
+  workflow_run:
+    workflows: ["Run Tests"]
+    types: 
+      - completed
 
 jobs:
   change-version:
@@ -9,6 +13,10 @@ jobs:
     continue-on-error: false
 
     steps:
+      - name: Check out Git repository
+        id: checkout
+        uses: actions/checkout@v2
+
       - name: Get current version
         id: get-version
         run: |
