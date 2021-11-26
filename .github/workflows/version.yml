@@ -16,15 +16,15 @@ jobs:
       - name: Get current version
         id: get-version
         run: |
-          echo "1"
-          version=$(grep "VERSION = " ./setup.py)
-          echo "2"
-          IFS=' = ' read -r -a version <<< "$version"
-          echo "3"
-          version="${version[1]}"
-          echo "4"
-          version=$(echo "$version" | sed "s/\"/\ /g")
-          echo $version
+          with open("setup.py") as file:
+            lines = file.readlines()
+
+          for line in lines:
+            if "VERSION = " in line:
+                version = line.split(" = ")[1]
+          print(version)
+
+        shell: python
 
       - name: Change version
         id: change-version
