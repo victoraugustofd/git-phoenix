@@ -57,8 +57,9 @@ jobs:
 
           for line in lines:
             if "VERSION = " in line:
-                old_version = line.split(" = ")[1].replace("\"", "")
+                old_version = line.split(" = ")[1]
 
+          print("Version: " + old_version)
           version = old_version.split(".")
           branch = os.getenv("GITHUB_REF").split("/")[-1]
 
