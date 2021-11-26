@@ -53,6 +53,8 @@ jobs:
           import os
           from git import Repo
 
+          print("Branch: " + os.getenv("GITHUB_REF"))
+
           GIT_REPO = Repo(".", search_parent_directories=True)
 
           with open("setup.py") as file:
@@ -62,7 +64,6 @@ jobs:
             if "VERSION = " in line:
                 old_version = line.split(" = ")[1]
 
-          print("Branch: " + os.getenv("GITHUB_REF"))
           version = old_version.split(".")
           branch = GIT_REPO.active_branch.name
 
