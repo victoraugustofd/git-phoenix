@@ -163,7 +163,7 @@ class Executable(ABC):
         LOGGER.debug(f"Processando parse método {value}...")
 
         method_definition = value.split("@")[1]
-        method_name = method_definition[0: method_definition.find("(")]
+        method_name = method_definition[0 : method_definition.find("(")]
 
         if method_name not in AVAILABLE_METHODS:
             raise MethodNotImplementedException()
@@ -172,9 +172,8 @@ class Executable(ABC):
             return self.action_execution.arguments[self.index_method_executed]
 
         original_arguments = method_definition[
-                             method_definition.find(
-                                 "(") + 1: method_definition.find(")")
-                             ]
+            method_definition.find("(") + 1 : method_definition.find(")")
+        ]
 
         # refs.: https://stackoverflow.com/a/48838456/7973282
         parsed_arguments = eval("dict({})".format(original_arguments))
@@ -220,3 +219,7 @@ class Executable(ABC):
                 value = value.replace(f"${var}", v)
 
         return value
+
+
+def test():
+    pass
