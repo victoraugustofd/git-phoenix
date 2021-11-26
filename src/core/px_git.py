@@ -54,7 +54,7 @@ def is_ahead():
 
     try:
         commits_ahead = GIT_REPO.iter_commits(branch + ".." + branch)
-        number_of_commits = len(commits_ahead)
+        number_of_commits = sum(1 for _ in commits_ahead)
 
         return number_of_commits > 0
     except GitCommandError:
@@ -69,6 +69,8 @@ def retrieve_current_branch():
 
 
 def checkout(branch):
+    global GIT_REPO
+
     LOGGER.info(f"Fazendo checkout da source {branch}...")
 
     GIT_REPO.git.checkout(branch)
@@ -84,6 +86,8 @@ def _validate_existence(branch):
 
 
 def checkout_new_branch(source: str, branch: str):
+    global GIT_REPO
+
     checkout(source)
     pull(source)
 
@@ -98,6 +102,8 @@ def checkout_new_branch(source: str, branch: str):
 
 
 def merge(source: str, target: str, allow_merge_again: bool):
+    global GIT_REPO
+
     if allow_merge_again or not _already_merged(target, source):
         checkout(target)
         pull(target)
@@ -125,6 +131,8 @@ def merge_request(source: str, target: str, allow_merge_again: bool,
 
 
 def pull(branch):
+    global GIT_REPO
+
     LOGGER.info(f"Atualizando source {branch}...")
 
     try:

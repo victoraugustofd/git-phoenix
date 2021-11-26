@@ -1,7 +1,7 @@
 import inspect
 import sys
 
-from src.core import get_config
+from src.core.px_git import get_config
 
 
 def is_mod_function(mod, func):

@@ -24,7 +24,7 @@ def _adjust_regex(r: str) -> str:
         r = "^" + r
     if not r.endswith("$"):
         r += "$"
-    return r.replace("/", "\/")
+    return r.replace("/", "\\/")
 
 
 def _validate_pattern(pattern: Pattern, text: str, msg: str):
@@ -163,7 +163,7 @@ class Executable(ABC):
         LOGGER.debug(f"Processando parse método {value}...")
 
         method_definition = value.split("@")[1]
-        method_name = method_definition[0 : method_definition.find("(")]
+        method_name = method_definition[0: method_definition.find("(")]
 
         if method_name not in AVAILABLE_METHODS:
             raise MethodNotImplementedException()
@@ -172,8 +172,9 @@ class Executable(ABC):
             return self.action_execution.arguments[self.index_method_executed]
 
         original_arguments = method_definition[
-            method_definition.find("(") + 1 : method_definition.find(")")
-        ]
+                             method_definition.find(
+                                 "(") + 1: method_definition.find(")")
+                             ]
 
         # refs.: https://stackoverflow.com/a/48838456/7973282
         parsed_arguments = eval("dict({})".format(original_arguments))
