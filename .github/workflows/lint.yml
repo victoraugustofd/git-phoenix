@@ -23,8 +23,8 @@ jobs:
         id: install
         run: pip install black flake8
 
-      - name: Run flake8
-        id: flake8
+      - name: Run linters
+        id: linters
         uses: wearerequired/lint-action@v1
         with:
           continue_on_error: false
