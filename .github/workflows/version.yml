@@ -1,10 +1,6 @@
 name: Version
 
-on:
-  workflow_run:
-    workflows: ["Run linters"]
-    types: 
-      - success
+on: push
 
 jobs:
   change-version:
