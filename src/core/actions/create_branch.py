@@ -1,12 +1,10 @@
 from dataclasses import dataclass
 
-import questionary
-
-from src.core.px_questionary import confirm
 from src.core.actions.executable import Executable
 from src.core.actions.executable import _validate_pattern
-from src.core.px_git import checkout_new_branch
 from src.core.models import ActionExecution
+from src.core.px_git import checkout_new_branch
+from src.core.px_questionary import confirm
 from src.core.template_models import Branch, Affix, Pattern
 
 

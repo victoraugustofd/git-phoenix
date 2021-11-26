@@ -1,10 +1,8 @@
-import questionary
-
 from distutils.version import LooseVersion
 
-from src.core.px_questionary import text
-from src.core import get_tags
+from src.core.px_git import get_tags
 from src.core.enums import TagIncrement
+from src.core.px_questionary import text
 
 
 def user_input(msg: str, execute: bool = True):
