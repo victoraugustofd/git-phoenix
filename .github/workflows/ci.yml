@@ -70,6 +70,7 @@ jobs:
             version[2] = str(int(version[2]) + 1)
 
           new_version = ".".join(version)
+          file_data = ""
 
           with open("setup.py") as file:
             file_data = file.read()
