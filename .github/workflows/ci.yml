@@ -43,6 +43,10 @@ jobs:
     needs: run-linters
 
     steps:
+      - name: Install Python dependencies
+        id: install
+        run: pip install GitPython
+
       - name: Change version
         id: get-version
         run: |
