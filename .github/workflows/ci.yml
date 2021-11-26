@@ -43,6 +43,10 @@ jobs:
     needs: run-linters
 
     steps:
+      - name: Check out Git repository
+        id: checkout
+        uses: actions/checkout@v2
+
       - name: Change version
         id: get-version
         run: |
