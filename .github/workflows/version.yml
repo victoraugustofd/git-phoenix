@@ -18,6 +18,8 @@ jobs:
         run: |
           with open("setup.py") as file:
             lines = file.readlines()
+          
+          print(lines)
 
           for line in lines:
             if "VERSION = " in line:
