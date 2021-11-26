@@ -17,7 +17,7 @@ jobs:
         id: get-version
         run: |
           echo "1"
-          version=$(grep "VERSION = " setup.py)
+          version=$(grep "VERSION = " ./setup.py)
           echo "2"
           IFS=' = ' read -r -a version <<< "$version"
           echo "3"
