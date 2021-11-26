@@ -25,7 +25,7 @@ jobs:
 
       - name: Install Python dependencies
         id: install
-        run: pip install black flake8 GitPython
+        run: pip install black flake8
 
       - name: Run linters
         id: linters
@@ -43,19 +43,10 @@ jobs:
     needs: run-linters
 
     steps:
-      - name: Install Python dependencies
-        id: install
-        run: pip install GitPython
-
       - name: Change version
         id: get-version
         run: |
           import os
-          from git import Repo
-
-          print("Branch: " + os.getenv("GITHUB_REF"))
-
-          GIT_REPO = Repo(".", search_parent_directories=True)
 
           with open("setup.py") as file:
             lines = file.readlines()
@@ -65,9 +56,9 @@ jobs:
                 old_version = line.split(" = ")[1]
 
           version = old_version.split(".")
-          branch = GIT_REPO.active_branch.name
+          branch = os.getenv("GITHUB_REF").split("/")[-1]
 
-          if branch == "main":
+          if "main" == branch:
             version[1] = str(int(version[1]) + 1)
             version[2] = "0"
 
