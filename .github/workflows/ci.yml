@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  run-linters:
+    name: Run linters
+    runs-on: ubuntu-latest
+    continue-on-error: false
+
+    steps:
+      - name: Check out Git repository
+        id: checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        id: setup
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install Python dependencies
+        id: install
+        run: pip install black flake8 GitPython
+
+      - name: Run linters
+        id: linters
+        uses: wearerequired/lint-action@v1
+        with:
+          continue_on_error: false
+          black: true
+          flake8: true
+          flake8_args: --ignore=E203 --per-file-ignores="src/core/rules.py:F401"
+
+  change-version:
+    name: Change Version
+    runs-on: ubuntu-latest
+    continue-on-error: false
+    needs: run-linters
+
+    steps:
+      - name: Change version
+        id: get-version
+        run: |
+          from git import Repo
+
+          GIT_REPO = Repo(".", search_parent_directories=True)
+
+          with open("setup.py") as file:
+            lines = file.readlines()
+
+          for line in lines:
+            if "VERSION = " in line:
+                old_version = line.split(" = ")[1]
+
+
+          version = old_version.split(".")
+          branch = GIT_REPO.active_branch.name
+
+          if branch == "main":
+            version[1] = str(int(version[1]) + 1)
+            version[2] = "0"
+
+          else: # develop
+            version[2] = str(int(version[2]) + 1)
+
+          new_version = ".".join(version)
+
+          with open("setup.py") as file:
+            file_data = file.read()
+            file_data = file_data.replace(old_version, new_version)
+
+          with open('setup.py','w') as file:
+            file.write(filedata)
+
+        shell: python
+
+      - name: Commit files
+        run: |
+          git config --local user.name "victoraugustofd-ghactions"
+          git add setup.py
+          git commit -m "[GitHubActions] Increasing version."
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          force: true
