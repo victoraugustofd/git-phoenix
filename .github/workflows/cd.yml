@@ -1,4 +1,4 @@
-name: CI
+name: CD
 
 on:
   workflow_run:
@@ -11,10 +11,11 @@ jobs:
   build-n-publish:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     
     steps:
+    - uses: actions/checkout@v2
     - name: Set up Python 3.9
-      uses: actions/checkout@v2
       uses: actions/setup-python@v1
       with:
         python-version: 3.7
