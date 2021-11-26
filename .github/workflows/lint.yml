@@ -22,8 +22,8 @@ jobs:
 
       - name: Run flake8
         uses: wearerequired/lint-action@v1
+        continue-on-error: false
         with:
-          continue-on-error: false
           flake8: true
           flake8_args: --ignore=E203 --per-file-ignores="src/core/rules.py:F401"
 
