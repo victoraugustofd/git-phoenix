@@ -1,13 +1,14 @@
 name: Version
 
-on: push
+on:
+  workflow_run:
+    workflows: ["Run linters"]
 
 jobs:
   change-version:
     name: Change Version
     runs-on: ubuntu-latest
     continue-on-error: false
-    needs: lint
 
     steps:
       - name: Get current version
