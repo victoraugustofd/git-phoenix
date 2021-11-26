@@ -36,6 +36,11 @@ jobs:
         with:
           black: true
 
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+
       - name: Check lint result
         id: check_result
         if: steps.flake8.outcome != 'success' || steps.black.outcome != 'success'
