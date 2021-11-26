@@ -10,17 +10,21 @@ jobs:
 
     steps:
       - name: Check out Git repository
+        id: checkout
         uses: actions/checkout@v2
 
       - name: Set up Python
+        id: setup
         uses: actions/setup-python@v1
         with:
           python-version: 3.7
 
       - name: Install Python dependencies
+        id: install
         run: pip install black flake8
 
       - name: Run flake8
+        id: flake8
         uses: wearerequired/lint-action@v1
         continue-on-error: false
         with:
@@ -28,6 +32,8 @@ jobs:
           flake8_args: --ignore=E203 --per-file-ignores="src/core/rules.py:F401"
 
       - name: Run black
+        id: black
         uses: wearerequired/lint-action@v1
+        if: steps.flake8.outcome != 'success'
         with:
           black: true
