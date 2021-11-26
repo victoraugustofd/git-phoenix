@@ -1,10 +1,6 @@
 name: Version
 
-on:
-  workflow_run:
-    workflows: ["Run Tests"]
-    types: 
-      - completed
+on: push
 
 jobs:
   change-version:
