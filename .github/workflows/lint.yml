@@ -31,16 +31,16 @@ jobs:
           flake8: true
           flake8_args: --ignore=E203 --per-file-ignores="src/core/rules.py:F401"
 
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+
       - name: Run black
         id: black
         uses: wearerequired/lint-action@v1
         with:
           black: true
-
-      - name: Dump steps context
-        env:
-          STEPS_CONTEXT: ${{ toJson(steps) }}
-        run: echo "$STEPS_CONTEXT"
 
       - name: Check lint result
         id: check_result
