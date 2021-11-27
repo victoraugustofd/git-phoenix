@@ -1,10 +1,12 @@
 # ignore everything
 /*
+/.*
 
 # ignore __pycache__ individually because it is on every folder
 __pycache__
 
 # accept
+!/.github
 !src/
 !tests/
 !.coveragerc

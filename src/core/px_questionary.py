@@ -3,7 +3,7 @@ from typing import List, TextIO
 from prompt_toolkit.output.win32 import NoConsoleScreenBufferError, Win32Output
 from questionary import form as f, select as s, confirm as c, text as t
 
-from core.utils import px_print
+from src.core.utils import px_print
 from src import CUSTOM_STYLE
 from src.core.utils import raiser
 from src.core.exceptions import (
