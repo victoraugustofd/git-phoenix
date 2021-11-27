@@ -11,7 +11,7 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 # Package version
-VERSION = "1.3.0"
+VERSION = "1.3.1"
 
 setup(
     name="git-phoenix",
