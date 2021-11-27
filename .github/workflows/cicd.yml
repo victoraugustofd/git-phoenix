@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   push:
@@ -121,6 +121,7 @@ jobs:
         --outdir dist/
         .
     - name: Publish distribution 📦 to Test PyPI
+      if: endsWith(github.ref, 'develop')
       uses: pypa/gh-action-pypi-publish@master
       with:
         password: ${{ secrets.TEST_PYPI_API_TOKEN }}
