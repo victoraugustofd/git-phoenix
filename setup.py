@@ -25,7 +25,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        "GitPython==3.1.24",
+        "GitPython==3.1.34",
         "regex==2021.4.4",
         "argparse==1.4.0",
         "jsonschema==4.0.1",
